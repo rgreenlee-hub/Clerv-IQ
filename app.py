@@ -14,6 +14,15 @@ from auth import auth_bp  # ADDED
 
 import traceback
 
+# ---------------------
+# Flask Setup
+# ---------------------
+app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey-change-this-in-production")  # UPDATED
+
+# Ensure instance folder exists
+os.makedirs(app.instance_path, exist_ok=True)
+
 # Enable detailed error output
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
@@ -24,15 +33,6 @@ def internal_error(error):
     print(traceback.format_exc())
     print("=" * 50)
     return f"<pre>{traceback.format_exc()}</pre>", 500
-
-# ---------------------
-# Flask Setup
-# ---------------------
-app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey-change-this-in-production")  # UPDATED
-
-# Ensure instance folder exists
-os.makedirs(app.instance_path, exist_ok=True)
 
 # ---------------------
 # Register Blueprints

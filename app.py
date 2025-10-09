@@ -81,24 +81,13 @@ except ImportError:
     print("Warning: Twilio not available")
     TWILIO_AVAILABLE = False
 
-try:
-    from receptionist.brain import ReceptionistBrain
-    brain = ReceptionistBrain()
-    RECEPTIONIST_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: ReceptionistBrain not available: {e}")
-    brain = None
-    RECEPTIONIST_AVAILABLE = False
+# Disable receptionist features for now - focus on getting site live
+RECEPTIONIST_AVAILABLE = False
+brain = None
+analytics = None
+CLIENTS = []
 
-# Analytics and Config are optional for now
-try:
-    from Config import CLIENTS
-    from Analytics import Analytics
-    analytics = Analytics()
-except ImportError as e:
-    print(f"Warning: Analytics module not available: {e}")
-    CLIENTS = []
-    analytics = None
+print("Receptionist features disabled - site running in basic mode")
 # ---------------------
 # User Model
 # ---------------------

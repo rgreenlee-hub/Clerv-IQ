@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClervIQ | Elite SMS Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      font-family: 'Courier Prime', monospace; 
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%);
+      color: #e8f0ff; 
+      display: flex; 
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .sidebar { 
+      width: 280px; 
+      background: rgba(15, 20, 40, 0.7);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(0, 212, 255, 0.1);
+      display: flex; 
+      flex-direction: column; 
+      padding: 30px 0; 
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+      z-index: 10;
+    }
+    
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(0, 212, 255, 0.03), transparent);
+      pointer-events: none;
+    }
+    
+    .sidebar h2 { 
+      text-align: center; 
+      font-size: 28px; 
+      margin-bottom: 50px; 
+      background: linear-gradient(135deg, #00d4ff 0%, #0080ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+      letter-spacing: 2px;
+    }
+    
+    .sidebar ul { list-style: none; padding: 0; margin: 0; }
+    .sidebar ul li { 
+      padding: 18px 30px; 
+      display: flex; 
+      align-items: center; 
+      cursor: pointer; 
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      border-left: 3px solid transparent;
+    }
+    
+    .sidebar ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 0;
+      background: linear-gradient(90deg, rgba(0, 212, 255, 0.2), transparent);
+      transition: width 0.4s ease;
+    }
+    
+    .sidebar ul li:hover::before {
+      width: 100%;
+    }
+    
+    .sidebar ul li i { 
+      margin-right: 15px; 
+      color: #00d4ff; 
+      font-size: 18px;
+      transition: all 0.3s ease;
+    }
+    
+    .sidebar ul li:hover { 
+      background: rgba(0, 212, 255, 0.08);
+      transform: translateX(8px);
+      border-left-color: #00d4ff;
+    }
+    
+    .sidebar ul li:hover i {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.6));
+    }
+    
+    .sidebar .bottom { 
+      margin-top: auto;
+      padding: 25px; 
+      text-align: center; 
+      font-size: 11px; 
+      color: rgba(255, 255, 255, 0.3);
+      letter-spacing: 1px;
+    }
+
+    .main-wrapper { 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      height: 100vh;
+      position: relative;
+    }
+    
+    .navbar { 
+      height: 80px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: flex-end; 
+      padding: 0 40px; 
+      background: rgba(15, 20, 40, 0.6);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+      z-index: 5;
+    }
+    
+    .navbar .user-info { 
+      display: flex; 
+      align-items: center; 
+      gap: 25px; 
+    }
+    
+    .navbar .user-info i { 
+      color: #00d4ff; 
+      font-size: 22px; 
+      cursor: pointer; 
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .navbar .user-info i:hover { 
+      transform: scale(1.15) rotate(5deg);
+      filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.8));
+    }
+    
+    .navbar .user-info .fa-bell::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 8px;
+      height: 8px;
+      background: #ff4d4d;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+    }
+
+    .main-content { 
+      flex: 1; 
+      padding: 50px; 
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    .main-content::before {
+      content: '';
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.1), transparent);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: breathe 8s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+    }
+    
+    h1 { 
+      margin-bottom: 40px; 
+      background: linear-gradient(135deg, #00d4ff 0%, #0080ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 38px; 
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 1;
+      animation: slideDown 0.6s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .kpi-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+      gap: 25px; 
+      margin-bottom: 50px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .kpi-card { 
+      background: rgba(20, 30, 60, 0.4);
+      backdrop-filter: blur(20px);
+      padding: 30px 25px; 
+      border-radius: 20px; 
+      text-align: center; 
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    .kpi-card:nth-child(1) { animation-delay: 0.1s; }
+    .kpi-card:nth-child(2) { animation-delay: 0.2s; }
+    .kpi-card:nth-child(3) { animation-delay: 0.3s; }
+    .kpi-card:nth-child(4) { animation-delay: 0.4s; }
+    .kpi-card:nth-child(5) { animation-delay: 0.5s; }
+    .kpi-card:nth-child(6) { animation-delay: 0.6s; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+      transition: left 0.6s ease;
+    }
+    
+    .kpi-card:hover::before {
+      left: 100%;
+    }
+    
+    .kpi-card:hover { 
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 15px 50px rgba(0, 212, 255, 0.3);
+      border-color: rgba(0, 212, 255, 0.4);
+      background: rgba(20, 30, 60, 0.6);
+    }
+    
+    .kpi-card h2 { 
+      margin: 0; 
+      font-size: 36px; 
+      background: linear-gradient(135deg, #00d4ff 0%, #00aaff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+    
+    .kpi-card p { 
+      margin: 10px 0 0; 
+      font-size: 13px; 
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .chart-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+      gap: 35px; 
+      margin-bottom: 50px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .chart-container { 
+      background: rgba(20, 30, 60, 0.4);
+      backdrop-filter: blur(20px);
+      padding: 30px; 
+      border-radius: 24px; 
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      transition: all 0.4s ease;
+      animation: fadeInUp 0.8s ease-out backwards;
+    }
+
+    .chart-container:nth-child(1) { animation-delay: 0.2s; }
+    .chart-container:nth-child(2) { animation-delay: 0.4s; }
+    .chart-container:nth-child(3) { animation-delay: 0.6s; }
+    
+    .chart-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 50px rgba(0, 212, 255, 0.2);
+      border-color: rgba(0, 212, 255, 0.3);
+    }
+    
+    .chart-container h3 {
+      margin: 0 0 20px 0;
+      color: #00d4ff;
+      font-size: 18px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    
+    canvas { max-width: 100%; height: auto; }
+
+    .section-title { 
+      margin: 40px 0 25px; 
+      background: linear-gradient(135deg, #00d4ff 0%, #0080ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 24px; 
+      text-transform: uppercase; 
+      letter-spacing: 2px;
+      position: relative;
+      z-index: 1;
+    }
+
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-top: 25px; 
+      background: rgba(20, 30, 60, 0.4);
+      backdrop-filter: blur(20px);
+      border-radius: 20px; 
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      position: relative;
+      z-index: 1;
+    }
+    
+    table th, table td { 
+      padding: 18px 20px; 
+      text-align: left; 
+      border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+    }
+    
+    table th { 
+      background: rgba(0, 212, 255, 0.05);
+      color: #00d4ff; 
+      font-size: 13px; 
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    
+    table td { 
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+    }
+    
+    table tbody tr {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    table tbody tr:hover {
+      background: rgba(0, 212, 255, 0.08);
+      transform: scale(1.01);
+    }
+    
+    table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    table a {
+      color: #00d4ff;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    table a:hover {
+      color: #00aaff;
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+
+    .export { 
+      margin-top: 30px;
+      display: flex;
+      gap: 15px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .export button { 
+      padding: 14px 28px; 
+      border-radius: 12px; 
+      border: none; 
+      background: linear-gradient(135deg, #00d4ff 0%, #0080ff 100%);
+      color: white; 
+      cursor: pointer;
+      font-family: 'Courier Prime', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .export button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+    
+    .export button:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .export button:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.5);
+    }
+    
+    .export button:active {
+      transform: translateY(-1px);
+    }
+
+    .status-sent { 
+      color: #00d4ff; 
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    }
+    
+    .status-delivered { 
+      color: #00ff88; 
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+    }
+    
+    .status-failed { 
+      color: #ff4d4d; 
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(255, 77, 77, 0.3);
+    }
+    
+    .status-read { 
+      color: #ffaa00; 
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 212, 255, 0.3);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 212, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>ClervIQ</h2>
+  <ul>
+  <li onclick="window.location.href='{{ url_for('dashboard.dashboard') }}'"><i class="fas fa-chart-line"></i> Dashboard</li>
+  <li onclick="window.location.href='{{ url_for('dashboard.calls_page') }}'"><i class="fas fa-phone-alt"></i> Calls</li>
+  <li onclick="window.location.href='{{ url_for('dashboard.sms_page') }}'"><i class="fas fa-sms"></i> SMS</li>
+  <li onclick="window.location.href='{{ url_for('dashboard.emails_page') }}'"><i class="fas fa-envelope"></i> Emails</li>
+  <li onclick="window.location.href='{{ url_for('dashboard.leads_page') }}'"><i class="fas fa-user-friends"></i> Leads</li>
+  <li onclick="window.location.href='{{ url_for('dashboard.opportunities_page') }}'"><i class="fas fa-briefcase"></i> Opportunities</li>
+  <li onclick="window.location.href='{{ url_for('dashboard.analytics_page') }}'"><i class="fas fa-chart-pie"></i> Analytics</li>
+  <li onclick="window.location.href='{{ url_for('dashboard.integrations_page') }}'"><i class="fas fa-plug"></i> Integrations</li>
+  <li onclick="window.location.href='{{ url_for('dashboard.billing_page') }}'"><i class="fas fa-credit-card"></i> Billing</li>
+  <li onclick="window.location.href='{{ url_for('dashboard.settings_page') }}'"><i class="fas fa-cogs"></i> Settings</li>
+</ul>
+    <div class="bottom">© 2025 ClervIQ</div>
+  </div>
+
+  <div class="main-wrapper">
+    <div class="navbar">
+      <div class="user-info">
+        <i class="fas fa-bell"></i>
+        <i class="fas fa-user-circle"></i>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <h1>💬 Elite SMS Dashboard</h1>
+
+      <div class="kpi-card"><h2>{{ data.total_sent }}</h2><p>Total Sent</p></div>
+<div class="kpi-card"><h2>{{ data.total_received }}</h2><p>Total Received</p></div>
+<div class="kpi-card"><h2>{{ data.delivery_rate }}</h2><p>Delivery Rate</p></div>
+<div class="kpi-card"><h2>{{ data.response_rate }}</h2><p>Response Rate</p></div>
+<div class="kpi-card"><h2>{{ data.avg_response_time }}</h2><p>Avg Response Time</p></div>
+<div class="kpi-card"><h2>{{ data.top_campaign }}</h2><p>Top Campaign</p></div>
+
+
+      <!-- Charts -->
+      <h2 class="section-title">SMS Analytics</h2>
+      <div class="chart-grid">
+        <div class="chart-container"><h3>Volume Over Time</h3><canvas id="lineChart"></canvas></div>
+        <div class="chart-container"><h3>Inbound vs Outbound</h3><canvas id="barChart"></canvas></div>
+        <div class="chart-container"><h3>Response Times</h3><canvas id="responseChart"></canvas></div>
+      </div>
+
+      <h2 class="section-title">SMS History</h2>
+      <table>
+        <thead>
+          <tr><th>Direction</th><th>Phone</th><th>Rep</th><th>Preview</th><th>Status</th><th>Timestamp</th><th>Response Time</th><th>Thread</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Outbound</td><td>(555) 123-4567</td><td>Jane Doe</td><td>"Hi, thanks for…"</td><td class="status-delivered">Delivered</td><td>2025-09-25 14:32</td><td>2m</td><td><a href="#">📂 Open</a></td></tr>
+          <tr><td>Inbound</td><td>(555) 987-6543</td><td>Tom Lee</td><td>"Can you send…"</td><td class="status-read">Read</td><td>2025-09-25 15:10</td><td>5m</td><td><a href="#">📂 Open</a></td></tr>
+          <tr><td>Outbound</td><td>(555) 222-3333</td><td>Jane Doe</td><td>"Following up on…"</td><td class="status-failed">Failed</td><td>2025-09-24 11:45</td><td>-</td><td><a href="#">📂 Open</a></td></tr>
+        </tbody>
+      </table>
+
+      <!-- Export -->
+      <div class="export">
+        <button>Export CSV</button>
+        <button>Export PDF</button>
+        <button>Export Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    Chart.defaults.color = '#ffffff';
+    Chart.defaults.borderColor = 'rgba(0, 212, 255, 0.1)';
+    
+    const lineCtx = document.getElementById('lineChart');
+    new Chart(lineCtx, { 
+      type: 'line', 
+      data: { 
+        labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], 
+        datasets: [{ 
+          label: 'Messages', 
+          data: [420,500,600,550,480,460,390], 
+          borderColor: '#00d4ff', 
+          backgroundColor: 'rgba(0,212,255,0.1)', 
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          pointBackgroundColor: '#00d4ff',
+          pointBorderColor: '#0a0e27',
+          pointBorderWidth: 2
+        }]
+      }, 
+      options: { 
+        responsive: true,
+        plugins: { 
+          legend: { 
+            labels: { 
+              color: '#fff',
+              font: { family: 'Courier Prime', size: 12 },
+              padding: 15
+            } 
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15, 20, 40, 0.9)',
+            borderColor: '#00d4ff',
+            borderWidth: 1,
+            titleFont: { family: 'Courier Prime', size: 14 },
+            bodyFont: { family: 'Courier Prime', size: 13 },
+            padding: 12
+          }
+        }, 
+        scales: { 
+          x: { 
+            ticks: { color: '#fff', font: { family: 'Courier Prime' } },
+            grid: { color: 'rgba(0, 212, 255, 0.1)' }
+          }, 
+          y: { 
+            ticks: { color: '#fff', font: { family: 'Courier Prime' } },
+            grid: { color: 'rgba(0, 212, 255, 0.1)' }
+          } 
+        } 
+      }
+    });
+
+    const barCtx = document.getElementById('barChart');
+    new Chart(barCtx, { 
+      type: 'bar', 
+      data: { 
+        labels: ['Inbound','Outbound'], 
+        datasets: [{ 
+          label: 'Volume', 
+          data: [1500,1700], 
+          backgroundColor: ['rgba(0, 255, 136, 0.6)','rgba(0, 212, 255, 0.6)'],
+          borderColor: ['#00ff88','#00d4ff'],
+          borderWidth: 2,
+          borderRadius: 8,
+          hoverBackgroundColor: ['rgba(0, 255, 136, 0.8)','rgba(0, 212, 255, 0.8)']
+        }]
+      }, 
+      options: { 
+        responsive: true,
+        plugins: { 
+          legend: { 
+            labels: { 
+              color: '#fff',
+              font: { family: 'Courier Prime', size: 12 },
+              padding: 15
+            } 
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15, 20, 40, 0.9)',
+            borderColor: '#00d4ff',
+            borderWidth: 1,
+            titleFont: { family: 'Courier Prime', size: 14 },
+            bodyFont: { family: 'Courier Prime', size: 13 },
+            padding: 12
+          }
+        }, 
+        scales: { 
+          x: { 
+            ticks: { color: '#fff', font: { family: 'Courier Prime' } },
+            grid: { color: 'rgba(0, 212, 255, 0.1)' }
+          }, 
+          y: { 
+            ticks: { color: '#fff', font: { family: 'Courier Prime' } },
+            grid: { color: 'rgba(0, 212, 255, 0.1)' }
+          } 
+        } 
+      }
+    });
+
+    const responseCtx = document.getElementById('responseChart');
+    new Chart(responseCtx, { 
+      type: 'bar', 
+      data: { 
+        labels: ['<1m','1-5m','5-15m','15m+'], 
+        datasets: [{ 
+          label: 'Responses', 
+          data: [500, 1200, 800, 400], 
+          backgroundColor: ['rgba(0, 255, 136, 0.6)','rgba(0, 212, 255, 0.6)','rgba(0, 128, 255, 0.6)','rgba(255, 204, 0, 0.6)'],
+          borderColor: ['#00ff88','#00d4ff','#0080ff','#ffcc00'],
+          borderWidth: 2,
+          borderRadius: 8,
+          hoverBackgroundColor: ['rgba(0, 255, 136, 0.8)','rgba(0, 212, 255, 0.8)','rgba(0, 128, 255, 0.8)','rgba(255, 204, 0, 0.8)']
+        }]
+      }, 
+      options: { 
+        responsive: true,
+        plugins: { 
+          legend: { 
+            labels: { 
+              color: '#fff',
+              font: { family: 'Courier Prime', size: 12 },
+              padding: 15
+            } 
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15, 20, 40, 0.9)',
+            borderColor: '#00d4ff',
+            borderWidth: 1,
+            titleFont: { family: 'Courier Prime', size: 14 },
+            bodyFont: { family: 'Courier Prime', size: 13 },
+            padding: 12
+          }
+        }, 
+        scales: { 
+          x: { 
+            ticks: { color: '#fff', font: { family: 'Courier Prime' } },
+            grid: { color: 'rgba(0, 212, 255, 0.1)' }
+          }, 
+          y: { 
+            ticks: { color: '#fff', font: { family: 'Courier Prime' } },
+            grid: { color: 'rgba(0, 212, 255, 0.1)' }
+          } 
+        } 
+      }
+    });
+  </script>
+</body>
+</html>

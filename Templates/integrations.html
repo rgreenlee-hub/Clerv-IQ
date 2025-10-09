@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClervIQ | Integrations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Courier Prime', monospace;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%);
+      color: #e8f0ff;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: rgba(15, 20, 40, 0.7);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(0, 212, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      padding: 30px 0;
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+      z-index: 10;
+    }
+
+    .sidebar h2 { 
+      text-align: center; 
+      font-size: 28px; 
+      margin-bottom: 50px; 
+      background: linear-gradient(135deg, #00d4ff 0%, #0080ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar ul { list-style: none; padding: 0; margin: 0; }
+    .sidebar ul li { 
+      padding: 18px 30px; 
+      display: flex; 
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.4s;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar ul li:hover {
+      background: rgba(0, 212, 255, 0.08);
+      border-left-color: #00d4ff;
+    }
+
+    .sidebar ul li i { margin-right: 15px; color: #00d4ff; }
+
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; height: 100vh; }
+
+    .navbar {
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 40px;
+      background: rgba(15, 20, 40, 0.6);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+    }
+
+    .main-content { flex: 1; padding: 50px; overflow-y: auto; }
+    h1 { 
+      margin-bottom: 40px; 
+      background: linear-gradient(135deg, #00d4ff 0%, #0080ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 38px;
+    }
+
+    .cards { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+      gap: 25px; 
+      margin-bottom: 50px;
+    }
+
+    .card { background: rgba(20, 30, 60, 0.4); padding: 30px; border-radius: 20px; text-align: center; }
+    .card h3 { color: rgba(255,255,255,0.6); font-size: 13px; text-transform: uppercase; }
+    .card p { font-size: 32px; font-weight: bold; background: linear-gradient(135deg, #00d4ff 0%, #00aaff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+    .integration-card { background: rgba(20, 30, 60, 0.4); padding: 35px 25px; border-radius: 20px; text-align: center; }
+    .integration-card h4 { margin: 15px 0; font-size: 20px; color: #fff; }
+
+    /* Voice Settings */
+    .voice-settings {
+      margin-top: 50px;
+      background: rgba(20, 30, 60, 0.4);
+      padding: 30px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .voice-settings label {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .voice-settings select, .voice-settings input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-family: 'Courier Prime', monospace;
+    }
+
+    .voice-settings button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #00d4ff, #0080ff);
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+    }
+
+    #voiceStatus { margin-top: 10px; font-size: 13px; color: #00d4ff; }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar">
+    <h2>ClervIQ</h2>
+   <ul>
+    <li onclick="window.location.href='{{ url_for("dashboard.dashboard") }}'"><i class="fas fa-chart-line"></i> Dashboard</li>
+    <li onclick="window.location.href='{{ url_for("dashboard.calls_page") }}'"><i class="fas fa-phone-alt"></i> Calls</li>
+    <li onclick="window.location.href='{{ url_for("dashboard.sms_page") }}'"><i class="fas fa-sms"></i> SMS</li>
+    <li onclick="window.location.href='{{ url_for("dashboard.emails_page") }}'"><i class="fas fa-envelope"></i> Emails</li>
+    <li onclick="window.location.href='{{ url_for("dashboard.leads_page") }}'"><i class="fas fa-user-friends"></i> Leads</li>
+    <li onclick="window.location.href='{{ url_for("dashboard.opportunities_page") }}'"><i class="fas fa-briefcase"></i> Opportunities</li>
+    <li onclick="window.location.href='{{ url_for("dashboard.analytics_page") }}'"><i class="fas fa-chart-pie"></i> Analytics</li>
+<li onclick="window.location.href='{{ url_for("dashboard.integrations_page") }}'"><i class="fas fa-plug"></i> Integrations</li>
+<li onclick="window.location.href='{{ url_for("dashboard.billing_page") }}'"><i class="fas fa-credit-card"></i> Billing</li>
+<li onclick="window.location.href='{{ url_for("dashboard.settings_page") }}'"><i class="fas fa-cogs"></i> Settings</li>
+<ul>
+  </div>
+
+  <div class="main-wrapper">
+    <div class="navbar">
+      <div class="user-info">
+        <i class="fas fa-bell"></i>
+        <i class="fas fa-user-circle"></i>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <h1>🔌 Integrations Hub</h1>
+
+      <div class="cards">
+        <div class="card"><h3>Twilio</h3><p>{{ integrations.twilio.status }}</p></div>
+        <div class="card"><h3>Stripe</h3><p>{{ integrations.stripe.status }}</p></div>
+        <div class="card"><h3>Google</h3><p>{{ integrations.google.status }}</p></div>
+      </div>
+
+      <div class="grid">
+        <div class="integration-card"><i class="fas fa-sms"></i><h4>Twilio</h4><p class="status Connected">Connected</p><button>Manage</button></div>
+        <div class="integration-card"><i class="fab fa-google"></i><h4>Google Workspace</h4><p class="status Connected">Connected</p><button>Manage</button></div>
+        <div class="integration-card"><i class="fas fa-credit-card"></i><h4>Stripe</h4><p class="status Pending">Pending</p><button>Connect</button></div>
+      </div>
+
+      <!-- 🎙️ Voice Settings Section -->
+      <div class="voice-settings">
+        <h3>🎙️ Voice Settings</h3>
+        <p>Customize your AI receptionist’s voice and accent.</p>
+
+        <label>Voice Type</label>
+        <select id="voice_type">
+          <option value="female">Female</option>
+          <option value="male">Male</option>
+          <option value="neutral">Neutral</option>
+          <option value="clone">Custom Cloned Voice</option>
+        </select>
+
+        <label>Accent</label>
+        <select id="accent">
+          <option value="us">American (US)</option>
+          <option value="uk">British (UK)</option>
+          <option value="au">Australian</option>
+          <option value="in">Indian</option>
+          <option value="es">Spanish</option>
+        </select>
+
+        <div id="clone_section" style="display:none;">
+          <label>Upload Voice Sample</label>
+          <input type="file" id="clone_file" accept="audio/*">
+        </div>
+
+        <button onclick="saveVoiceSettings()">Save Voice Settings</button>
+        <p id="voiceStatus"></p>
+      </div>
+
+      <script>
+        const voiceSelect = document.getElementById("voice_type");
+        const cloneSection = document.getElementById("clone_section");
+        voiceSelect.addEventListener("change", () => {
+          cloneSection.style.display = voiceSelect.value === "clone" ? "block" : "none";
+        });
+
+        async function saveVoiceSettings() {
+          const voiceType = document.getElementById("voice_type").value;
+          const accent = document.getElementById("accent").value;
+          const cloneFile = document.getElementById("clone_file").files[0];
+          const formData = new FormData();
+          formData.append("voice_type", voiceType);
+          formData.append("accent", accent);
+          if (cloneFile) formData.append("clone_file", cloneFile);
+
+          const res = await fetch("/api/receptionist/voice/settings", { method: "POST", body: formData });
+          const data = await res.json();
+          document.getElementById("voiceStatus").innerText =
+            data.status === "success"
+              ? "✅ Voice settings saved successfully!"
+              : "❌ " + (data.error || "Failed to save settings");
+        }
+      </script>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,677 @@
+
+<!-- ROI Calculator -->
+<section id="roi-calculator" class="roi-calculator">
+  <h2 class="section-title">📊 ROI Calculator</h2>
+  <p class="section-subtitle">See how much revenue Clerv IQ can save your business.</p>
+
+  <!-- Two-column container -->
+  <div class="calc-card">
+    
+    <!-- Left: Inputs -->
+    <div class="calc-inputs">
+      <label>Hours Spent on Calls per Week</label>
+      <input type="number" id="timeSpent" placeholder="e.g. 40">
+
+      <label>Average Client Value ($)</label>
+      <input type="number" id="clientValue" placeholder="e.g. 3000">
+
+      <label>Weekly Call Volume</label>
+      <input type="number" id="callVolume" placeholder="e.g. 100">
+
+      <label>Conversion Rate (%)</label>
+      <input type="number" id="conversionRate" placeholder="e.g. 10">
+
+      <button onclick="calculateROI()" class="calc-btn">⚡ Calculate ROI</button>
+    </div>
+
+    <!-- Right: Results -->
+    <div class="calc-results">
+      <h3>📈 Your Results</h3>
+      <p><strong>Monthly Savings:</strong> <span id="monthly-savings">$0</span></p>
+      <p><strong>Annual Savings:</strong> <span id="annual-savings">$0</span></p>
+      <p><strong>ROI:</strong> <span id="roi-percentage">0%</span></p>
+      <p><strong>Payback Period:</strong> <span id="payback-period">0 months</span></p>
+
+      <!-- Chart -->
+      <canvas id="roiChart"></canvas>
+    </div>
+
+  </div>
+</section>
+
+<!-- Styles -->
+<style>
+  .section-title {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    color: #00c8ff;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+  }
+  .section-subtitle {
+    color: #aaa;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  /* Two-column card */
+  .calc-card {
+    display: flex;
+    gap: 40px;
+    background: rgba(20,20,20,0.7);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 0 30px rgba(0,200,255,0.15);
+    max-width: 1000px;
+    margin: auto;
+  }
+
+  .calc-inputs, .calc-results {
+    flex: 1;
+  }
+
+  /* Inputs */
+  .calc-inputs label {
+    display: block;
+    margin-top: 15px;
+    color: #eaeaea;
+    font-weight: 500;
+  }
+  .calc-inputs input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 10px;
+    background: #111;
+    color: #fff;
+  }
+  .calc-btn {
+    margin-top: 25px;
+    padding: 14px 20px;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #00c8ff, #0077ff);
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .calc-btn:hover {
+    background: linear-gradient(90deg, #0077ff, #00c8ff);
+  }
+
+  /* Results */
+  .calc-results {
+    text-align: left;
+  }
+  .calc-results h3 {
+    margin-bottom: 20px;
+    color: #00c8ff;
+  }
+  .calc-results p {
+    margin: 10px 0;
+    font-size: 1.1rem;
+    color: #eaeaea;
+  }
+  #roiChart {
+    margin-top: 20px;
+    max-height: 250px;
+  }
+
+  /* Responsive: stack on small screens */
+  @media (max-width: 768px) {
+    .calc-card {
+      flex-direction: column;
+    }
+  }
+/* ROI Calculator */
+.roi-calculator {
+  margin-bottom: 100px;   /* space before testimonials */
+}
+
+/* Testimonials */
+.testimonials {
+  padding-top: 100px;     /* optional extra breathing room */
+}
+
+</style>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- JS -->
+<script>
+function calculateROI() {
+  const timeSpent = parseFloat(document.getElementById("timeSpent").value) || 0;
+  const clientValue = parseFloat(document.getElementById("clientValue").value) || 0;
+  const callVolume = parseFloat(document.getElementById("callVolume").value) || 0;
+  const conversionRate = (parseFloat(document.getElementById("conversionRate").value) || 0) / 100;
+
+  // Simple model
+  const potentialClients = callVolume * conversionRate;
+  const revenueIncrease = potentialClients * clientValue;
+  const timeSavingsValue = timeSpent * 4 * 50; // assume $50/hr equivalent efficiency
+
+  const totalMonthlySavings = revenueIncrease + timeSavingsValue;
+  const annualSavings = totalMonthlySavings * 12;
+  const roi = annualSavings > 0 ? (annualSavings / 24000) * 100 : 0; // assume $2k/mo cost
+  const payback = annualSavings > 0 ? (24000 / annualSavings) * 12 : 0;
+
+  // Update UI
+  document.getElementById("monthly-savings").textContent = "$" + totalMonthlySavings.toLocaleString();
+  document.getElementById("annual-savings").textContent = "$" + annualSavings.toLocaleString();
+  document.getElementById("roi-percentage").textContent = roi.toFixed(1) + "%";
+  document.getElementById("payback-period").textContent = payback.toFixed(1) + " months";
+
+  // Chart
+  const ctx = document.getElementById('roiChart').getContext('2d');
+  if (window.roiChartInstance) window.roiChartInstance.destroy();
+  window.roiChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Annual Savings', 'Annual Cost'],
+      datasets: [{
+        data: [annualSavings, 24000],
+        backgroundColor: ['#00c8ff', '#333']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: "#fff" } }
+      }
+    }
+  });
+}
+</script>
+
+
+<!-- JS -->
+<script>
+function calculateROI() {
+  const timeSpent = parseFloat(document.getElementById("timeSpent").value) || 0;
+  const clientValue = parseFloat(document.getElementById("clientValue").value) || 0;
+  const callVolume = parseFloat(document.getElementById("callVolume").value) || 0;
+  const conversionRate = (parseFloat(document.getElementById("conversionRate").value) || 0) / 100;
+
+  // Simple calculations
+  const potentialClients = callVolume * conversionRate;
+  const revenueIncrease = potentialClients * clientValue;
+  const timeSavingsValue = timeSpent * 4 * 50; // assume $50/hr equivalent efficiency
+
+  const totalMonthlySavings = revenueIncrease + timeSavingsValue;
+  const annualSavings = totalMonthlySavings * 12;
+  const roi = annualSavings > 0 ? (annualSavings / 24000) * 100 : 0; // assuming $2k/mo cost baseline
+  const payback = annualSavings > 0 ? (24000 / annualSavings) * 12 : 0;
+
+  // Update UI
+  document.getElementById("monthly-savings").textContent = "$" + totalMonthlySavings.toLocaleString();
+  document.getElementById("annual-savings").textContent = "$" + annualSavings.toLocaleString();
+  document.getElementById("roi-percentage").textContent = roi.toFixed(1) + "%";
+  document.getElementById("payback-period").textContent = payback.toFixed(1) + " months";
+
+  // Chart
+  const ctx = document.getElementById('roiChart').getContext('2d');
+  if (window.roiChartInstance) window.roiChartInstance.destroy();
+  window.roiChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Annual Savings', 'Annual Cost'],
+      datasets: [{
+        data: [annualSavings, 24000],
+        backgroundColor: ['#00c8ff', '#333']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: "#fff" } }
+      }
+    }
+  });
+}
+</script>
+
+<section>
+
+<!-- ===== Testimonials ===== -->
+<section id="testimonials" class="testimonials">
+<h2 class="testimonials-title">Trusted by Elite Businesses</h2>
+  <p class="testimonials-subtitle">Real results. Real growth. No missed opportunities.</p>
+
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <p class="testimonial-quote">
+        “We recovered over <strong>$250,000</strong> in missed revenue within the first 90 days.”
+      </p>
+      <span class="testimonial-role">CEO, National Healthcare Group</span>
+    </div>
+
+    <div class="testimonial-card">
+      <p class="testimonial-quote">
+        “Our pipeline saw a <strong>35% increase in qualified leads</strong> after implementing Clerviq.”
+      </p>
+      <span class="testimonial-role">Managing Director, Real Estate Firm</span>
+    </div>
+
+    <div class="testimonial-card">
+      <p class="testimonial-quote">
+        “We booked <strong>50+ new consultations</strong> in just the first month — game changing.”
+      </p>
+      <span class="testimonial-role">Founder, Elite MedSpa</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Styles ===== -->
+<style>
+  .testimonials-section {
+    padding: 100px 20px;
+    background: #0a0a0a;
+    color: #fff;
+    text-align: center;
+  }
+.testimonials-title,
+.testimonials-subtitle {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+  .testimonials-title {
+    font-size: 2.5rem;
+    font-family: 'Courier New', monospace;
+    color: #00c8ff;
+    margin-bottom: 15px;
+  }
+
+  .testimonials-subtitle {
+    font-size: 1.2rem;
+    color: #aaa;
+    margin-bottom: 60px;
+  }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .testimonial-card {
+    background: rgba(20,20,20,0.95);
+    border-radius: 15px;
+    padding: 40px 30px;
+    box-shadow: 0 0 25px rgba(0,200,255,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .testimonial-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0 40px rgba(0,200,255,0.25);
+  }
+
+  .testimonial-quote {
+    font-size: 1.3rem;
+    font-style: italic;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    color: #eaeaea;
+  }
+
+  .testimonial-role {
+    font-size: 0.95rem;
+    color: #00c8ff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+.testimonials {
+  margin-bottom: 100px;  /* push FAQ down */
+}
+
+.faqs {
+  padding-top: 100px;    /* optional extra breathing room */
+}
+
+</style>
+
+
+  <!-- FAQ Section -->
+  <section id="faqs" class="faqs">
+    <h2 class="faq-title">❓ Frequently Asked Questions</h2>
+    <p class="faq-subtitle">Everything you need to know about Clerv IQ. Click a question to reveal the answer.</p>
+
+    <div class="faq-container">
+
+      <!-- FAQ 1 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>🤖 What exactly is Clerv IQ?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Clerv IQ is a 24/7 AI receptionist and business intelligence system. It captures leads across phone, SMS, email, and webchat, books appointments instantly, and delivers real-time ROI analytics.
+        </div>
+      </div>
+
+      <!-- FAQ 2 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>⚡ How fast can I get started?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Most businesses are fully deployed in under 10 minutes. Our white-glove onboarding team handles everything so ROI begins on day one.
+        </div>
+      </div>
+
+      <!-- FAQ 3 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>📞 Does it really replace a live receptionist?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Yes. Clerv IQ handles every inbound call, text, or email with human-level polish — at infinite scale. Unlike a human, it never misses a lead.
+        </div>
+      </div>
+
+      <!-- FAQ 4 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>🔒 How secure is Clerv IQ?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Clerv IQ is enterprise-grade secure with AES-256 encryption, SSL/TLS transmission, and full HIPAA, GDPR, and CCPA compliance.
+        </div>
+      </div>
+
+      <!-- FAQ 5 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>💰 What’s the ROI I can expect?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          On average, our clients capture $85,000–$250,000 in annual revenue within the first year. Many achieve ROI before even completing onboarding.
+        </div>
+      </div>
+
+      <!-- FAQ 6 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>🏢 What industries does Clerv IQ work best for?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Clerv IQ is trusted by dental groups, real estate brokerages, medical practices, law firms, and more — any business that manages calls or lead flow.
+        </div>
+      </div>
+
+      <!-- FAQ 7 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>🤝 What support do I get?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Every client is assigned a dedicated success manager and has access to 24/7 technical support to ensure maximum ROI and growth.
+        </div>
+      </div>
+
+      <!-- FAQ 8 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>🏆 What makes Clerv IQ better than other AI receptionists?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Unlike budget competitors, Clerv IQ delivers:<br>
+          • Enterprise security & compliance<br>
+          • Real-time ROI analytics & attribution<br>
+          • Elite onboarding + white-glove support<br>
+          • Scalability to 1,000+ locations<br>
+          • Proven $1M+ in recovered revenue per client annually
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    document.querySelectorAll(".faq-question").forEach(question => {
+      question.addEventListener("click", () => {
+        const card = question.parentElement;
+        card.classList.toggle("active");
+      });
+    });
+  </script>
+
+</body>
+</html>
+
+
+<!-- ===== Footer ===== -->
+<footer>
+  <p>© 2025 Clerv IQ, Inc. All rights reserved.</p>
+  <p>
+    <a href="#" onclick="openModal('privacyModal')">Privacy Policy</a> | 
+    <a href="#" onclick="openModal('termsModal')">Terms of Service</a>
+  </p>
+</footer>
+
+<!-- ===== Modals ===== -->
+<!-- Privacy Policy Modal -->
+<div id="privacyModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <h2>Privacy Policy</h2>
+    <p>
+      At <strong>Clerv IQ</strong>, your privacy is our priority. 
+      We safeguard all client communications, data, and analytics with enterprise-grade security. 
+      No information is sold or shared with third parties except where required by law.
+    </p>
+    <h3>Key Points:</h3>
+    <ul>
+      <li>✔ Data is encrypted at rest and in transit</li>
+      <li>✔ We comply with GDPR, CCPA, and HIPAA standards</li>
+      <li>✔ You retain ownership of your data</li>
+      <li>✔ Information is never shared without your consent</li>
+    </ul>
+    <p>
+      For full details, contact us at <a href="mailto:support@clerviq.com">support@clerviq.com</a>.
+    </p>
+  </div>
+</div>
+
+
+<!-- ===== Terms of Service Modal ===== -->
+<div id="termsModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Terms of Service</h2>
+    <p>Welcome to Clerviq. By accessing or using our services, you agree to the following Terms of Service.</p>
+
+    <h3>1. Acceptance of Terms</h3>
+    <p>By using Clerviq’s platform, you confirm that you are at least 18 years old, authorized to enter into these terms, and agree to comply with all applicable laws.</p>
+
+    <h3>2. Use of Services</h3>
+    <ul>
+      <li>You may use our AI receptionist and related services solely for lawful business purposes.</li>
+      <li>You agree not to misuse, disrupt, or attempt unauthorized access to our systems.</li>
+      <li>All analytics and ROI data provided are for informational purposes and should not be considered financial guarantees.</li>
+    </ul>
+
+    <h3>3. Accounts & Security</h3>
+    <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities conducted under your account. Notify us immediately of any unauthorized use.</p>
+
+    <h3>4. Payments & Billing</h3>
+    <p>Subscription fees, onboarding costs, and related charges are non-refundable unless explicitly stated in writing. Payments are billed on a monthly basis and may be subject to applicable taxes.</p>
+
+    <h3>5. Intellectual Property</h3>
+    <p>All rights, titles, and interests in the Clerviq platform, including software, logos, designs, and content, are owned exclusively by Clerviq. Unauthorized use is prohibited.</p>
+
+    <h3>6. Limitation of Liability</h3>
+    <p>Clerviq is not liable for indirect, incidental, or consequential damages arising from the use of our services. Our total liability is limited to the amount you paid in the last 12 months.</p>
+
+    <h3>7. Termination</h3>
+    <p>We reserve the right to suspend or terminate your account if you violate these Terms of Service or engage in activities harmful to our platform or reputation.</p>
+
+    <h3>8. Governing Law</h3>
+    <p>These terms are governed by the laws of the State of California, without regard to conflict of law principles.</p>
+
+    <p><b>Effective Date:</b> September 2025</p>
+  </div>
+</div>
+
+<script>
+  function openModal(id){ document.getElementById(id).style.display='flex'; }
+  function closeModal(id){ document.getElementById(id).style.display='none'; }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.getElementById("roiForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  // Collect inputs
+  const currentCosts = parseFloat(document.getElementById("currentCosts").value);
+  const timeSpent = parseFloat(document.getElementById("timeSpent").value);
+  const hourlyRate = parseFloat(document.getElementById("hourlyRate").value);
+  const callVolume = parseFloat(document.getElementById("callVolume").value);
+  const conversionRate = parseFloat(document.getElementById("conversionRate").value) / 100;
+
+  // Elite ROI logic
+  const laborSavings = timeSpent * hourlyRate * 4; // weekly → monthly
+  const revenueIncrease = callVolume * conversionRate * 200; // assume $200 avg deal value
+  const monthlySavings = laborSavings + revenueIncrease;
+  const annualSavings = monthlySavings * 12;
+  const roi = ((annualSavings - (currentCosts * 12)) / (currentCosts * 12)) * 100;
+  const payback = (currentCosts * 12) / annualSavings * 12;
+
+  // Update results
+  document.getElementById("monthly-savings").textContent = `$${monthlySavings.toLocaleString()}`;
+  document.getElementById("annual-savings").textContent = `$${annualSavings.toLocaleString()}`;
+  document.getElementById("roi-percentage").textContent = `${roi.toFixed(1)}%`;
+  document.getElementById("payback").textContent = `${payback.toFixed(1)} months`;
+
+  document.getElementById("roiResults").classList.remove("hidden");
+
+  // Chart.js visualization
+  const ctx = document.getElementById("roiChart").getContext("2d");
+  new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Annual Savings", "Annual Costs"],
+      datasets: [{
+        data: [annualSavings, currentCosts * 12],
+        backgroundColor: ["#00c6ff", "#333"]
+      }]
+    }
+  });
+});
+</script>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clerviq FAQ</title>
+  <style>
+    /* FAQ Section */
+    #faq {
+      max-width: 900px;
+      margin: 80px auto;
+      padding: 20px;
+    }
+
+    .faq-title {
+      text-align: center;
+      font-size: 32px;
+      color: #00c8ff;
+      margin-bottom: 10px;
+    }
+
+    .faq-subtitle {
+      text-align: center;
+      font-size: 16px;
+      color: #aaa;
+      margin-bottom: 40px;
+    }
+
+    .faq-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .faq-card {
+      background: linear-gradient(160deg, #111, #1a1a1a);
+      border-radius: 14px;
+      border: 1px solid rgba(0,200,255,0.3);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6), 0 0 20px rgba(0,200,255,0.15);
+      overflow: hidden;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .faq-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 25px rgba(0,200,255,0.3), 0 0 35px rgba(0,200,255,0.5);
+    }
+
+    .faq-question {
+      padding: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #00c8ff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .faq-question:hover {
+      color: #00e0ff;
+    }
+
+    .arrow {
+      font-size: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-answer {
+      padding: 0 20px 20px 20px;
+      font-size: 15px;
+      color: #ddd;
+      line-height: 1.6;
+      display: none;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .faq-card.active .faq-answer {
+      display: block;
+    }
+
+    .faq-card.active .arrow {
+      transform: rotate(180deg);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+
+</body>
+</html>
+

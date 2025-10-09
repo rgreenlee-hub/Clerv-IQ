@@ -1,0 +1,43 @@
+# Core framework
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# Database / ORM
+Flask-SQLAlchemy==3.0.5
+SQLAlchemy==1.4.46
+
+# Forms / validation
+Flask-WTF==1.1.1
+WTForms==3.0.1
+
+# Authentication & security
+Flask-Login==0.6.2
+Flask-Bcrypt==1.0.1
+
+# Database migrations
+Flask-Migrate==4.0.5
+
+# Email
+Flask-Mail==0.9.1
+
+# API / HTTP requests
+requests==2.31.0
+
+# Environment variable support
+python-dotenv==1.0.0
+
+# REST APIs
+Flask-RESTful==0.3.10
+
+# Task scheduling (optional, background jobs)
+APScheduler==3.10.4
+
+# Payments (Stripe)
+stripe==6.4.0
+
+# Twilio (SMS/Voice webhooks)
+twilio==9.0.5
+
+# --- Deployment ---
+gunicorn==21.2.0      # For Linux servers (Heroku, Render, etc.)
+waitress==2.1.2       # For Windows / cross-platform

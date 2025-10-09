@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clerv Iq | Elite AI Receptionist & Analytics</title>
+  <!-- Google Fonts: Courier Prime -->
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Courier Prime', monospace;
+      background: #0a0a0a;
+      color: #eaeaea;
+      line-height: 1.6;
+    }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(90deg, #0a0a0a, #111);
+      padding: 18px 60px;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .navbar .logo {
+      color: #00c8ff;
+      font-weight: 700;
+      font-size: 22px;
+      text-decoration: none;
+      letter-spacing: 1px;
+    }
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s;
+      display: flex;
+      align-items: center;
+    }
+    .nav-links a:hover { color: #00c8ff; }
+    .btn-portal {
+      background: #00c8ff;
+      color: #000 !important;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      transition: 0.3s ease;
+    }
+    .btn-portal:hover {
+      background: #00a5d9;
+      color: #000 !important;
+    }
+
+    /* ===== Hero Section ===== */
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      overflow: hidden;
+    }
+    .hero video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+    }
+    .video-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: -1;
+    }
+    .hero-content {
+      color: #fff;
+      max-width: 800px;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+    }
+    .hero-buttons a {
+      display: inline-block;
+      margin: 0 10px;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: bold;
+      text-decoration: none;
+      background: #00c8ff;
+      color: #111;
+      transition: 0.3s;
+    }
+    .hero-buttons a:hover { background: #0090c5; color: #fff; }
+
+    /* ===== Modal ===== */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+    .modal-content {
+      background: #111;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      color: #eaeaea;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .close {
+      float: right;
+      cursor: pointer;
+      color: #00c8ff;
+      font-size: 20px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: #00c8ff;
+      color: #111;
+      font-weight: bold;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    .btn:hover { background: #0090c5; color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- ===== Navbar ===== -->
+<header class="navbar">
+  <a href="#" class="logo">CLERV IQ</a>
+  <nav class="nav-links">
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#roi-calculator">ROI Calculator</a>
+    <a href="#testimonials">Testimonials</a>
+    <a href="#faqs">FAQs</a>
+    <a href="{{ url_for('login') }}" class="btn">Client Portal</a>
+  </nav>
+</header>
+
+<!-- ===== Hero Section ===== -->
+<section id="home" class="hero">
+  <video autoplay muted loop playsinline>
+    <source src="{{ url_for('static', filename='videos/clerviq-bg.mp4') }}" type="video/mp4">
+  </video>
+  <div class="video-overlay"></div>
+  <div class="hero-content">
+    <h1>AI Receptionist. Real-Time Analytics. Zero Missed Leads.</h1>
+    <p>Clerv IQ powers your business with 24/7 lead capture, seamless communication, and executive-level reporting.</p>
+    <div class="hero-buttons">
+      <a href="#pricing">View Pricing</a>
+      <a href="#roi-calculator">Calculate ROI</a>
+      <a href="#" onclick="openModal('receptionistModal')">🎙 Talk to the Receptionist</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Receptionist Modal ===== -->
+<div id="receptionistModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('receptionistModal')">&times;</span>
+    <h2>Talk to the AI Receptionist</h2>
+    <p>Press start and speak — our AI receptionist will respond instantly.</p>
+    
+    <button id="startBtn" class="btn">🎤 Start Talking</button>
+    <button id="stopBtn" class="btn">⏹ Stop</button>
+    
+    <div id="conversationLog" style="margin-top:20px; max-height:200px; overflow-y:auto; background:#1a1a1a; padding:15px; border-radius:8px;">
+      <p><em>Conversation will appear here...</em></p>
+    </div>
+  </div>
+</div>
+
+<script>
+function openModal(id){ document.getElementById(id).style.display='flex'; }
+function closeModal(id){ document.getElementById(id).style.display='none'; }
+
+let mediaRecorder;
+let audioChunks = [];
+const logBox = document.getElementById("conversationLog");
+
+function logMessage(sender, text) {
+  const msg = document.createElement("p");
+  msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
+  logBox.appendChild(msg);
+  logBox.scrollTop = logBox.scrollHeight;
+}
+
+document.getElementById("startBtn").onclick = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  mediaRecorder = new MediaRecorder(stream);
+  audioChunks = [];
+
+  mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+
+  mediaRecorder.onstop = async () => {
+    const blob = new Blob(audioChunks, { type: "audio/webm" });
+    const formData = new FormData();
+    formData.append("audio", blob, "input.webm");
+
+    logMessage("You", "[voice input sent]");
+
+    const res = await fetch("/ai_receptionist", { method: "POST", body: formData });
+    const data = await res.json();
+
+    logMessage("Receptionist", data.text || "...");
+
+    if (data.audio_url) {
+      const audio = new Audio(data.audio_url);
+      audio.play();
+    }
+  };
+
+  mediaRecorder.start();
+};
+
+document.getElementById("stopBtn").onclick = () => {
+  if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+};
+</script>
+
+</body>
+</html>
+
+    </div>
+  </div>
+</section>
+
+
+
+<!-- About Clerv IQ -->
+<section id="about" class="about-section">
+  <div class="about-container">
+    <h2 class="about-title">The Clerv IQ Journey</h2>
+    <p class="about-tagline">
+      Clerv IQ was born from a single mission: ensure businesses never miss an opportunity again.  
+    </p>
+
+    <div class="about-timeline">
+      <!-- Step 1 -->
+      <div class="timeline-item">
+        <div class="timeline-icon">🔍</div>
+        <div class="timeline-content">
+          <h3>Clarity</h3>
+          <p>
+            Every business loses leads. Calls missed, emails forgotten, data scattered.  
+            We started Clerv IQ with a simple question: <em>What if technology could give businesses crystal-clear communication, 24/7?</em>
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="timeline-item">
+        <div class="timeline-icon">👁</div>
+        <div class="timeline-content">
+          <h3>Vision</h3>
+          <p>
+            To build more than just an answering system.  
+            Our vision was to deliver <strong>real-time analytics</strong>, actionable insights, and the power to see the unseen — helping leaders make bold, data-driven moves.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="timeline-item">
+        <div class="timeline-icon">🧠</div>
+        <div class="timeline-content">
+          <h3>Intelligence</h3>
+          <p>
+            Intelligence is the heartbeat of Clerv IQ.  
+            An AI receptionist that doesn’t just answer calls — it learns, adapts, and becomes smarter with every interaction, working as hard as your top performer.
+          </p>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="timeline-item">
+        <div class="timeline-icon">🚀</div>
+        <div class="timeline-content">
+          <h3>The Future</h3>
+          <p>
+            Today, Clerv IQ stands as a partner for elite businesses worldwide.  
+            Tomorrow, our mission continues — pushing the limits of AI, automation, and human connection.  
+            <strong>Clarity. Vision. Intelligence.</strong> Together, they shape the future of business communication.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Styles -->
+<style>
+  .about-section {
+    padding: 100px 20px;
+    background: #0a0a0a;
+    color: #eaeaea;
+    text-align: center;
+  }
+  .about-container {
+    max-width: 1100px;
+    margin: auto;
+  }
+  .about-title {
+    font-size: 3rem;
+    font-family: 'Courier New', monospace;
+    color: #00c8ff;
+    margin-bottom: 15px;
+  }
+  .about-tagline {
+    font-size: 1.3rem;
+    color: #aaa;
+    margin-bottom: 60px;
+  }
+  .about-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    position: relative;
+  }
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 25px;
+    text-align: left;
+  }
+  .timeline-icon {
+    font-size: 2rem;
+    color: #00c8ff;
+    flex-shrink: 0;
+    background: rgba(0,200,255,0.1);
+    padding: 15px;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(0,200,255,0.3);
+  }
+  .timeline-content {
+    flex: 1;
+    background: rgba(20,20,20,0.85);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,200,255,0.15);
+    transition: transform 0.3s ease;
+  }
+  .timeline-content:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 0 25px rgba(0,200,255,0.3);
+  }
+  .timeline-content h3 {
+    font-size: 1.6rem;
+    color: #00c8ff;
+    margin-bottom: 25px;
+  }
+  .timeline-content p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #ddd;
+  }
+</style>
+
+<!-- ===== Why Businesses Choose Clerv IQ ===== -->
+<section id="features" class="features">
+  <h2 class="section-title">Why Businesses Choose Clerv IQ</h2>
+  <div class="features-grid">
+
+    <!-- Card 1 -->
+    <div class="feature-card">
+      <div class="icon">🤖</div>
+      <h3>24/7 AI Receptionist</h3>
+      <p>Never miss a lead — ever. Clerv IQ answers, qualifies, and books appointments across all channels, 24/7, with polished brand-matched responses.</p>
+      <ul>
+        <li>Omnichannel: Phone, SMS, Email, Webchat</li>
+        <li>Instant scheduling synced to your calendar</li>
+        <li>AI lead scoring with zero wasted calls</li>
+      </ul>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="feature-card">
+      <div class="icon">📊</div>
+      <h3>Elite Analytics</h3>
+      <p>Clerv IQ doesn’t just answer — it measures, learns, and optimizes. Every call becomes revenue intelligence you can actually act on.</p>
+      <ul>
+        <li>Live ROI + payback period tracking</li>
+        <li>Conversion alerts and weekly executive reports</li>
+        <li>Attribution by channel, campaign, or team</li>
+      </ul>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="feature-card">
+      <div class="icon">🔒</div>
+      <h3>Enterprise Security</h3>
+      <p>Bank-level protection and compliance standards built in from day one. Clerv IQ is ready for industries where trust is non-negotiable.</p>
+      <ul>
+        <li>HIPAA, GDPR, and CCPA compliance</li>
+        <li>End-to-end AES-256 encryption</li>
+        <li>Full audit logging + multi-factor authentication</li>
+      </ul>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="feature-card">
+      <div class="icon">⚡</div>
+      <h3>Rapid Onboarding</h3>
+      <p>Deploy in minutes, not months. Our plug-and-play system and white-glove team guarantee ROI from day one.</p>
+      <ul>
+        <li>5-minute setup with guided onboarding</li>
+        <li>Native CRM + phone system integrations</li>
+        <li>Dedicated success manager</li>
+      </ul>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="feature-card">
+      <div class="icon">🚀</div>
+      <h3>Unmatched Performance</h3>
+      <p>Built for scale, optimized for growth, proven in the field. No competitor comes close.</p>
+      <ul>
+        <li>99.9% uptime SLA with redundancy</li>
+        <li>Handles 10M+ conversations per day</li>
+        <li>$1M+ revenue captured per client annually</li>
+      </ul>
+    </div>
+
+<style>
+/* ===== FEATURES SECTION ===== */
+.features {
+  max-width: 1200px;
+  margin: 100px auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 36px;
+  margin-bottom: 50px;
+  color: #00c8ff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: bold;
+  text-shadow: 0 0 15px rgba(0,200,255,0.6);
+}
+
+/* Pyramid-style layout: 2 on top, 3 on bottom */
+.features-grid {
+  display: grid;
+  grid-gap: 30px;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  grid-template-areas:
+    "card1 card2 card3"
+    ". card4 card5";
+}
+
+.feature-card:nth-child(1) { grid-area: card1; }
+.feature-card:nth-child(2) { grid-area: card2; }
+.feature-card:nth-child(3) { grid-area: card3; }
+.feature-card:nth-child(4) { grid-area: card4; }
+.feature-card:nth-child(5) { grid-area: card5; }
+
+/* Card styling */
+.feature-card {
+  background: linear-gradient(160deg, #111, #1a1a1a);
+  border-radius: 16px;
+  border: 1px solid rgba(0,200,255,0.3);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.7), 0 0 30px rgba(0,200,255,0.2);
+  padding: 30px 25px;
+  text-align: left;
+  color: #eaeaea;
+  transition: all 0.35s ease;
+  max-width: 340px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover glow effect */
+.feature-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(0,200,255,0.4), 0 0 50px rgba(0,200,255,0.7);
+  border-color: rgba(0,200,255,0.7);
+}
+
+/* Icon styling */
+.feature-card .icon {
+  font-size: 42px;
+  margin-bottom: 25px;
+  color: #00c8ff;
+  filter: drop-shadow(0 0 10px rgba(0,200,255,0.7));
+}
+
+/* Headings */
+.feature-card h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #00c8ff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Text */
+.feature-card p {
+  font-size: 15px;
+  margin-bottom: 15px;
+  color: #ccc;
+  line-height: 1.6;
+}
+
+/* Bullet points */
+.feature-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.feature-card ul li {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #bbb;
+  position: relative;
+  padding-left: 20px;
+}
+.feature-card ul li::before {
+  content: "✔";
+  position: absolute;
+  left: 0;
+  color: #00c8ff;
+  font-size: 14px;
+}
+</style>
+
+</section>
+
+
+<!-- ===== Pricing Section ===== -->
+<section id="pricing" class="pricing">
+  <div class="pricing-card">
+    <h2 class="section-title">CLERV IQ CONCIERGE PLAN</h2>
+    
+    <div class="pricing-details">
+      <p class="price-initiation">$3,000 <span>One-Time Initiation</span></p>
+      <p class="price-monthly">$2,000 <span>/ Month Concierge Service</span></p>
+    </div>
+
+    <ul class="pricing-list">
+      <li>✔ Phone, SMS & Email Lead Capture</li>
+      <li>✔ Pre-Trained Concierge AI (100+ industries)</li>
+      <li>✔ Executive Analytics Dashboard</li>
+      <li>✔ CRM & Calendar Integrations</li>
+      <li>✔ 24/7 Concierge Support</li>
+      <li>✔ Enterprise-Grade Security & Compliance</li>
+    </ul>
+<a href="{{ url_for('register') }}">
+  <button class="cta-btn">Get Started</button>
+</a>
+
+<style>
+/* ===== Pricing Section ===== */
+.pricing {
+  display: flex;
+  justify-content: center;
+  padding: 80px 20px;
+}
+
+.pricing-card {
+  max-width: 700px;
+  background: #0d0d0d;
+  padding: 50px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(0, 200, 255, 0.2);
+}
+
+.section-title {
+  font-size: 28px;
+  color: #00c8ff;
+  margin-bottom: 30px;
+}
+
+.pricing-details {
+  margin-bottom: 30px;
+}
+
+.price-initiation,
+.price-monthly {
+  font-size: 22px;
+  margin: 10px 0;
+  font-weight: bold;
+  color: #fff;
+}
+
+.price-initiation span,
+.price-monthly span {
+  font-size: 14px;
+  font-weight: normal;
+  color: #bbb;
+}
+
+.pricing-list {
+  list-style: none;
+  padding: 0;
+  margin: 30px 0;
+  text-align: left;
+  display: inline-block;
+}
+
+.pricing-list li {
+  margin: 10px 0;
+  font-size: 16px;
+  color: #eaeaea;
+  position: relative;
+  padding-left: 25px;
+}
+
+.pricing-list li::before {
+  content: "✔";
+  position: absolute;
+  left: 0;
+  color: #00c8ff;
+  font-weight: bold;
+}
+
+.cta-btn {
+  font-family: 'Courier New', monospace;
+  font-size: 1.2rem;
+  font-weight: bold;
+ background: #00c8ff;
+  color: #000;
+  padding: 14px 30px;
+  border: none;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-btn:hover {
+  background: #009ec4;
+  transform: translateY(-2px);
+}
+/* Pricing section */
+.pricing {
+  margin-bottom: 100px;  /* big gap before ROI Calculator */
+}
+
+/* ROI Calculator section */
+.roi-calculator {
+  padding-top: 100px;  /* optional extra breathing room */
+}
+
+</style>
+
+
+</section>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROI Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      background: #0a0a0a;
+      color: #eaeaea;
+      line-height: 1.6;
+    }
+
+    /* Section Wrapper */
+    .roi-section {
+      max-width: 1100px;
+      margin: 80px auto;
+      padding: 20px;
+    }
+
+    .roi-section h2 {
+      font-size: 2rem;
+      text-align: center;
+      color: #00c8ff;
+      margin-bottom: 10px;
+    }
+
+    .roi-section p {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 40px;
+    }
+
+    /* Calculator Layout */
+    .roi-card {
+      display: flex;
+      gap: 40px;
+      background: rgba(20, 20, 20, 0.85);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0, 200, 255, 0.15);
+    }
+
+    .calc-inputs, .calc-results {
+      flex: 1;
+    }
+
+    /* Inputs */
+    .calc-inputs label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #eaeaea;
+    }
+
+    .calc-inputs input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: none;
+      border-radius: 10px;
+      background: #111;
+      color: #fff;
+    }
+
+    .calc-btn {
+      margin-top: 25px;
+      padding: 14px;
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #00c8ff, #0077ff);
+      color: #fff;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .calc-btn:hover {
+      background: linear-gradient(90deg, #0077ff, #00c8ff);
+    }
+
+    /* Results */
+    .calc-results h3 {
+      margin-bottom: 20px;
+      color: #00c8ff;
+    }
+
+    .calc-results p {
+      margin: 10px 0;
+      font-size: 1.1rem;
+      color: #eaeaea;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .roi-card {
+        flex-direction: column;
+      }
+    }
+
+#roi-calculator {
+  margin-bottom: 100px;  /* adjust this value for more or less space */
+}
+
+  </style>
+</head>
+<body>
+
+<!-- ROI Calculator (Conservative & Realistic) -->
+<section id="roi-calculator" class="roi-section" style="font-family: 'Courier Prime', monospace; color: #eaeaea; background:#0a0a0a; padding:40px; border-radius:20px;">
+
+  <h2 style="font-size:28px; margin-bottom:10px;">📊 ROI Calculator</h2>
+  <p style="margin-bottom:20px;">See how much revenue Clerv IQ can realistically recover for your business.</p>
+
+  <div class="roi-card" style="display:flex; gap:40px; flex-wrap:wrap;">
+    
+    <!-- Left: Inputs -->
+    <div class="calc-inputs" style="flex:1; min-width:280px;">
+      <label>Select Industry</label>
+      <select id="industry" onchange="setIndustryDefaults()" 
+        style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #444; border-radius:8px; background:#111; color:#eaeaea; font-family:'Courier Prime', monospace;">
+        <option value="brokerage">Real Estate Brokerage</option>
+        <option value="dentist">Dentist</option>
+        <option value="healthcare">Healthcare / Med Spa</option>
+        <option value="lending">Lending / Mortgage</option>
+        <option value="sales">High-Ticket Sales</option>
+      </select>
+
+      <label>Missed Calls per Week</label>
+      <input type="number" id="missedCalls" placeholder="e.g. 10" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #444; border-radius:8px; background:#111; color:#eaeaea;">
+
+      <label>Missed Emails per Week</label>
+      <input type="number" id="missedEmails" placeholder="e.g. 5" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #444; border-radius:8px; background:#111; color:#eaeaea;">
+
+      <label>Missed Messages per Week</label>
+      <input type="number" id="missedSMS" placeholder="e.g. 8" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #444; border-radius:8px; background:#111; color:#eaeaea;">
+
+      <label>Average Value per Client / Deal ($)</label>
+      <input type="number" id="dealValue" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #444; border-radius:8px; background:#111; color:#eaeaea;">
+
+      <label>Conversion Rate of Saved Leads (%)</label>
+      <input type="number" id="conversionRate" style="width:100%; padding:10px; margin-bottom:20px; border:1px solid #444; border-radius:8px; background:#111; color:#eaeaea;">
+
+      <button onclick="calculateROI()" 
+        style="width:100%; padding:14px; border:none; border-radius:10px; background:#00c8ff; color:#000; font-weight:bold; font-size:16px; cursor:pointer;">
+        ⚡ Calculate ROI
+      </button>
+    </div>
+
+    <!-- Right: Results + Chart -->
+    <div class="calc-results" style="flex:1; min-width:280px;">
+      <h3 style="margin-bottom:15px;">📈 Your Results</h3>
+      <p><strong>Extra Clients / Deals per Month:</strong> <span id="deals-month">0</span></p>
+      <p><strong>Monthly Revenue Increase:</strong> <span id="monthly-savings">$0</span></p>
+      <p><strong>Annual Revenue Increase:</strong> <span id="annual-savings">$0</span></p>
+      <p><strong>ROI:</strong> <span id="roi-percentage">0%</span></p>
+      <p><strong>Payback Period:</strong> <span id="payback-period">0 months</span></p>
+
+      <canvas id="roiChart" style="margin-top:20px; max-height:280px;"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+function setIndustryDefaults() {
+  const industry = document.getElementById("industry").value;
+
+  let defaults = {
+    brokerage: { dealValue: 25000, conversionRate: 1 },   // 1% conservative
+    dentist:   { dealValue: 1000,  conversionRate: 15 },  // 15% realistic
+    healthcare:{ dealValue: 2000,  conversionRate: 10 },  // 10% realistic
+    lending:   { dealValue: 5000,  conversionRate: 3 },   // 3% conservative
+    sales:     { dealValue: 3000,  conversionRate: 7 }    // 7% realistic
+  };
+
+  document.getElementById("dealValue").value = defaults[industry].dealValue;
+  document.getElementById("conversionRate").value = defaults[industry].conversionRate;
+
+  // Lock conversion rate for brokerage and lending
+  if (industry === "brokerage" || industry === "lending") {
+    document.getElementById("conversionRate").setAttribute("readonly", true);
+    document.getElementById("conversionRate").style.background = "#222"; 
+    document.getElementById("conversionRate").style.color = "#bbb"; 
+  } else {
+    document.getElementById("conversionRate").removeAttribute("readonly");
+    document.getElementById("conversionRate").style.background = "#111"; 
+    document.getElementById("conversionRate").style.color = "#eaeaea"; 
+  }
+}
+
+function calculateROI() {
+  const missedCalls = parseFloat(document.getElementById("missedCalls").value) || 0;
+  const missedEmails = parseFloat(document.getElementById("missedEmails").value) || 0;
+  const missedSMS = parseFloat(document.getElementById("missedSMS").value) || 0;
+  const dealValue = parseFloat(document.getElementById("dealValue").value) || 0;
+  const conversionRate = (parseFloat(document.getElementById("conversionRate").value) || 0) / 100;
+
+  const aiMonthlyCost = 2000;   
+  const aiAnnualCost = aiMonthlyCost * 12;
+
+  const totalMissed = missedCalls + missedEmails + missedSMS;
+  const convertedLeads = totalMissed * conversionRate;
+  const monthlyRevenueIncrease = convertedLeads * dealValue;
+  const annualRevenueIncrease = monthlyRevenueIncrease * 12;
+
+  const roi = annualRevenueIncrease > 0 ? ((annualRevenueIncrease - aiAnnualCost) / aiAnnualCost) * 100 : 0;
+  const payback = annualRevenueIncrease > 0 ? (aiAnnualCost / annualRevenueIncrease) * 12 : 0;
+
+  // Update UI
+  document.getElementById("deals-month").textContent = convertedLeads.toFixed(1);
+  document.getElementById("monthly-savings").textContent = "$" + monthlyRevenueIncrease.toLocaleString();
+  document.getElementById("annual-savings").textContent = "$" + annualRevenueIncrease.toLocaleString();
+  document.getElementById("roi-percentage").textContent = roi.toFixed(1) + "%";
+  document.getElementById("payback-period").textContent = payback.toFixed(1) + " months";
+
+  // Chart
+  const ctx = document.getElementById("roiChart").getContext("2d");
+  if (window.roiChartInstance) window.roiChartInstance.destroy();
+  window.roiChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Monthly Increase", "Annual Increase", "AI Cost (Annual)"],
+      datasets: [{
+        data: [monthlyRevenueIncrease, annualRevenueIncrease, aiAnnualCost],
+        backgroundColor: ["#00c8ff", "#00ff99", "#ff4444"]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#eaeaea", font: { family: 'Courier Prime' } } },
+        y: { ticks: { color: "#eaeaea", font: { family: 'Courier Prime' } } }
+      }
+    }
+  });
+}
+
+window.onload = setIndustryDefaults;
+</script>
+
+
+
+<!-- ===== Testimonials ===== -->
+<section id="testimonials" class="testimonials">
+<h2 class="testimonials-title">Trusted by Elite Businesses</h2>
+  <p class="testimonials-subtitle">Real results. Real growth. No missed opportunities.</p>
+
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <p class="testimonial-quote">
+        “We recovered over <strong>$250,000</strong> in missed revenue within the first 90 days.”
+      </p>
+      <span class="testimonial-role">CEO, National Healthcare Group</span>
+    </div>
+
+    <div class="testimonial-card">
+      <p class="testimonial-quote">
+        “Our pipeline saw a <strong>35% increase in qualified leads</strong> after implementing Clerviq.”
+      </p>
+      <span class="testimonial-role">Managing Director, Real Estate Firm</span>
+    </div>
+
+    <div class="testimonial-card">
+      <p class="testimonial-quote">
+        “We booked <strong>50+ new consultations</strong> in just the first month — game changing.”
+      </p>
+      <span class="testimonial-role">Founder, Elite MedSpa</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Styles ===== -->
+<style>
+  .testimonials-section {
+    padding: 100px 20px;
+    background: #0a0a0a;
+    color: #fff;
+    text-align: center;
+  }
+.testimonials-title,
+.testimonials-subtitle {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+  .testimonials-title {
+    font-size: 2.5rem;
+    font-family: 'Courier New', monospace;
+    color: #00c8ff;
+    margin-bottom: 15px;
+  }
+
+  .testimonials-subtitle {
+    font-size: 1.2rem;
+    color: #aaa;
+    margin-bottom: 60px;
+  }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .testimonial-card {
+    background: rgba(20,20,20,0.95);
+    border-radius: 15px;
+    padding: 40px 30px;
+    box-shadow: 0 0 25px rgba(0,200,255,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .testimonial-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0 40px rgba(0,200,255,0.25);
+  }
+
+  .testimonial-quote {
+    font-size: 1.3rem;
+    font-style: italic;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    color: #eaeaea;
+  }
+
+  .testimonial-role {
+    font-size: 0.95rem;
+    color: #00c8ff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+.testimonials {
+  margin-bottom: 100px;  /* push FAQ down */
+}
+
+.faqs {
+  padding-top: 100px;    /* optional extra breathing room */
+}
+
+</style>
+
+
+  <!-- FAQ Section -->
+  <section id="faqs" class="faqs">
+    <h2 class="faq-title">❓ Frequently Asked Questions</h2>
+    <p class="faq-subtitle">Everything you need to know about Clerv IQ. Click a question to reveal the answer.</p>
+
+    <div class="faq-container">
+
+      <!-- FAQ 1 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>🤖 What exactly is Clerv IQ?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Clerv IQ is a 24/7 AI receptionist and business intelligence system. It captures leads across phone, SMS, email, and webchat, books appointments instantly, and delivers real-time ROI analytics.
+        </div>
+      </div>
+
+      <!-- FAQ 2 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>⚡ How fast can I get started?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Most businesses are fully deployed in under 10 minutes. Our white-glove onboarding team handles everything so ROI begins on day one.
+        </div>
+      </div>
+
+      <!-- FAQ 3 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>📞 Does it really replace a live receptionist?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Yes. Clerv IQ handles every inbound call, text, or email with human-level polish — at infinite scale. Unlike a human, it never misses a lead.
+        </div>
+      </div>
+
+      <!-- FAQ 4 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>🔒 How secure is Clerv IQ?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Clerv IQ is enterprise-grade secure with AES-256 encryption, SSL/TLS transmission, and full HIPAA, GDPR, and CCPA compliance.
+        </div>
+      </div>
+
+      <!-- FAQ 5 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>💰 What’s the ROI I can expect?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          On average, our clients capture $85,000–$250,000 in annual revenue within the first year. Many achieve ROI before even completing onboarding.
+        </div>
+      </div>
+
+      <!-- FAQ 6 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>🏢 What industries does Clerv IQ work best for?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Clerv IQ is trusted by dental groups, real estate brokerages, medical practices, law firms, and more — any business that manages calls or lead flow.
+        </div>
+      </div>
+
+      <!-- FAQ 7 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>🤝 What support do I get?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Every client is assigned a dedicated success manager and has access to 24/7 technical support to ensure maximum ROI and growth.
+        </div>
+      </div>
+
+      <!-- FAQ 8 -->
+      <div class="faq-card">
+        <div class="faq-question">
+          <span>🏆 What makes Clerv IQ better than other AI receptionists?</span>
+          <i class="arrow">▼</i>
+        </div>
+        <div class="faq-answer">
+          Unlike budget competitors, Clerv IQ delivers:<br>
+          • Enterprise security & compliance<br>
+          • Real-time ROI analytics & attribution<br>
+          • Elite onboarding + white-glove support<br>
+          • Scalability to 1,000+ locations<br>
+          • Proven $1M+ in recovered revenue per client annually
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    document.querySelectorAll(".faq-question").forEach(question => {
+      question.addEventListener("click", () => {
+        const card = question.parentElement;
+        card.classList.toggle("active");
+      });
+    });
+  </script>
+
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clerviq FAQ</title>
+  <style>
+    /* FAQ Section */
+    #faq {
+      max-width: 900px;
+      margin: 80px auto;
+      padding: 20px;
+    }
+
+    .faq-title {
+      text-align: center;
+      font-size: 32px;
+      color: #00c8ff;
+      margin-bottom: 10px;
+    }
+
+    .faq-subtitle {
+      text-align: center;
+      font-size: 16px;
+      color: #aaa;
+      margin-bottom: 40px;
+    }
+
+    .faq-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .faq-card {
+      background: linear-gradient(160deg, #111, #1a1a1a);
+      border-radius: 14px;
+      border: 1px solid rgba(0,200,255,0.3);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6), 0 0 20px rgba(0,200,255,0.15);
+      overflow: hidden;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .faq-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 25px rgba(0,200,255,0.3), 0 0 35px rgba(0,200,255,0.5);
+    }
+
+    .faq-question {
+      padding: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #00c8ff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .faq-question:hover {
+      color: #00e0ff;
+    }
+
+    .arrow {
+      font-size: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-answer {
+      padding: 0 20px 20px 20px;
+      font-size: 15px;
+      color: #ddd;
+      line-height: 1.6;
+      display: none;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .faq-card.active .faq-answer {
+      display: block;
+    }
+
+    .faq-card.active .arrow {
+      transform: rotate(180deg);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== Footer Styles ===== */
+    footer {
+      background: #0a0a0a;
+      text-align: center;
+      padding: 30px 20px;
+      color: #fff;
+      font-family: 'Courier Prime', monospace;
+      font-size: 14px;
+      border-top: 1px solid rgba(0,200,255,0.3); /* subtle cyan divider */
+      margin-top: 100px;
+    }
+
+    footer a {
+      color: #00c8ff;
+      text-decoration: none;
+      margin: 0 8px;
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: #00e0ff;
+    }
+
+    footer p {
+      margin: 8px 0;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #111;
+      color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      font-family: 'Courier Prime', monospace;
+    }
+
+    .close-btn, .close {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
+      color: #00c8ff;
+    }
+
+    .close-btn:hover, .close:hover {
+      color: #00e0ff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <p>© 2025 Clerv IQ, Inc. All rights reserved.</p>
+    <p>
+      <a href="#" onclick="openModal('privacyModal')">Privacy Policy</a> | 
+      <a href="#" onclick="openModal('termsModal')">Terms of Service</a>
+    </p>
+  </footer>
+
+  <!-- ===== Modals ===== -->
+  <div id="privacyModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal('privacyModal')">&times;</span>
+      <h2>Privacy Policy</h2>
+      <p>
+        At <strong>Clerv IQ</strong>, your privacy is our priority. 
+        We safeguard all client communications, data, and analytics with enterprise-grade security. 
+        No information is sold or shared with third parties except where required by law.
+      </p>
+      <h3>Key Points:</h3>
+      <ul>
+        <li>✔ Data is encrypted at rest and in transit</li>
+        <li>✔ We comply with GDPR, CCPA, and HIPAA standards</li>
+        <li>✔ You retain ownership of your data</li>
+        <li>✔ Information is never shared without your consent</li>
+      </ul>
+      <p>
+        For full details, contact us at <a href="mailto:support@clerviq.com">support@clerviq.com</a>.
+      </p>
+    </div>
+  </div>
+
+  <div id="termsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('termsModal')">&times;</span>
+      <h2>Terms of Service</h2>
+      <p>Welcome to Clerviq. By accessing or using our services, you agree to the following Terms of Service.</p>
+      <h3>1. Acceptance of Terms</h3>
+      <p>By using Clerviq’s platform, you confirm that you are at least 18 years old, authorized to enter into these terms, and agree to comply with all applicable laws.</p>
+      <h3>2. Use of Services</h3>
+      <ul>
+        <li>You may use our AI receptionist and related services solely for lawful business purposes.</li>
+        <li>You agree not to misuse, disrupt, or attempt unauthorized access to our systems.</li>
+        <li>All analytics and ROI data provided are for informational purposes and should not be considered financial guarantees.</li>
+      </ul>
+      <h3>3. Accounts & Security</h3>
+      <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities conducted under your account. Notify us immediately of any unauthorized use.</p>
+      <h3>4. Payments & Billing</h3>
+      <p>Subscription fees, onboarding costs, and related charges are non-refundable unless explicitly stated in writing. Payments are billed on a monthly basis and may be subject to applicable taxes.</p>
+      <h3>5. Intellectual Property</h3>
+      <p>All rights, titles, and interests in the Clerviq platform, including software, logos, designs, and content, are owned exclusively by Clerviq. Unauthorized use is prohibited.</p>
+      <h3>6. Limitation of Liability</h3>
+      <p>Clerviq is not liable for indirect, incidental, or consequential damages arising from the use of our services. Our total liability is limited to the amount you paid in the last 12 months.</p>
+      <h3>7. Termination</h3>
+      <p>We reserve the right to suspend or terminate your account if you violate these Terms of Service or engage in activities harmful to our platform or reputation.</p>
+      <h3>8. Governing Law</h3>
+      <p>These terms are governed by the laws of the State of California, without regard to conflict of law principles.</p>
+      <p><b>Effective Date:</b> September 2025</p>
+    </div>
+  </div>
+
+  <!-- ===== Modal Scripts ===== -->
+  <script>
+    function openModal(id){ 
+      document.getElementById(id).style.display='flex'; 
+    }
+    function closeModal(id){ 
+      document.getElementById(id).style.display='none'; 
+    }
+  </script>
+
+</body>
+</html>
+

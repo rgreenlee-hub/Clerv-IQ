@@ -1,0 +1,187 @@
+<!-- ===== Pricing ===== -->
+<section id="pricing" class="section">
+  <h2 class="section-title">Clerviq Elite Concierge Plan</h2>
+  <div class="pricing-content" style="text-align:center;">
+    <h3>$3,000 One-Time Initiation</h3>
+    <h3>$2,000 / Month Concierge Service</h3>
+    <ul style="list-style:none; padding:0;">
+      <li>✔ Phone, SMS & Email Lead Capture</li>
+      <li>✔ Pre-Trained Concierge AI (100+ industries)</li>
+      <li>✔ Executive Analytics Dashboard</li>
+      <li>✔ CRM & Calendar Integrations</li>
+      <li>✔ 24/7 Concierge Support</li>
+      <li>✔ Enterprise-Grade Security & Compliance</li>
+    </ul>
+    <a href="https://calendar.google.com" target="_blank" class="btn">Begin Onboarding Process</a>
+</section>
+
+
+<!-- ROI Calculator -->
+<section id="roi-calculator" class="section">
+    <h2 class="section-title">📊 ROI Calculator</h2>
+    <p class="section-subtitle">See how much revenue Clerviq can save your business.</p>
+
+      <!-- Inputs -->
+      <div class="calc-inputs">
+        <label>Current Monthly Receptionist Cost ($)</label>
+        <input type="number" id="currentCosts" placeholder="e.g. 3000">
+
+        <label>Hours Spent on Calls per Week</label>
+        <input type="number" id="timeSpent" placeholder="e.g. 40">
+
+        <label>Average Hourly Rate ($)</label>
+        <input type="number" id="hourlyRate" placeholder="e.g. 30">
+
+        <label>Weekly Call Volume</label>
+        <input type="number" id="callVolume" placeholder="e.g. 100">
+
+        <label>Conversion Rate (%)</label>
+        <input type="number" id="conversionRate" placeholder="e.g. 10">
+
+        <label>Efficiency Gain (%)</label>
+        <input type="number" id="efficiency" placeholder="e.g. 30">
+
+        <button onclick="calculateROI()" class="calc-btn">⚡ Calculate ROI</button>
+      </div>
+
+      <!-- Results -->
+      <div class="calc-results">
+        <h3>📈 Your Results</h3>
+        <p><strong>Monthly Savings:</strong> <span id="monthly-savings">$0</span></p>
+        <p><strong>Annual Savings:</strong> <span id="annual-savings">$0</span></p>
+        <p><strong>ROI:</strong> <span id="roi-percentage">0%</span></p>
+        <p><strong>Payback Period:</strong> <span id="payback-period">0 months</span></p>
+
+        <!-- Chart -->
+        <canvas id="roiChart"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Styles -->
+<style>
+  .calculator-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 60px 20px;
+    text-align: center;
+  }
+  .section-title {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #00c8ff;
+    font-family: 'Courier New', monospace;
+  }
+  .section-subtitle {
+    color: #aaa;
+    margin-bottom: 40px;
+  }
+  .calc-card {
+    display: flex;
+    gap: 40px;
+    background: rgba(20,20,20,0.7);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 0 30px rgba(0,200,255,0.15);
+    backdrop-filter: blur(10px);
+  }
+  .calc-inputs, .calc-results {
+    flex: 1;
+    text-align: left;
+  }
+  .calc-inputs label {
+    display: block;
+    margin-top: 15px;
+    color: #eaeaea;
+    font-weight: 500;
+  }
+  .calc-inputs input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 10px;
+    background: #111;
+    color: #fff;
+  }
+  .calc-btn {
+    margin-top: 25px;
+    padding: 14px 20px;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #00c8ff, #0077ff);
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .calc-btn:hover {
+    background: linear-gradient(90deg, #0077ff, #00c8ff);
+  }
+  .calc-results h3 {
+    margin-bottom: 20px;
+    color: #00c8ff;
+  }
+  .calc-results p {
+    margin: 10px 0;
+    font-size: 1.1rem;
+  }
+  #roiChart {
+    margin-top: 20px;
+    max-height: 250px;
+  }
+</style>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- JS -->
+<script>
+function calculateROI() {
+  const currentCosts = parseFloat(document.getElementById("currentCosts").value) || 0;
+  const timeSpent = parseFloat(document.getElementById("timeSpent").value) || 0;
+  const hourlyRate = parseFloat(document.getElementById("hourlyRate").value) || 0;
+  const callVolume = parseFloat(document.getElementById("callVolume").value) || 0;
+  const conversionRate = parseFloat(document.getElementById("conversionRate").value) / 100 || 0;
+  const efficiency = parseFloat(document.getElementById("efficiency").value) / 100 || 0;
+
+  const monthlyCost = currentCosts;
+  const timeSavings = timeSpent * efficiency * 4; // monthly hours saved
+  const laborSavings = timeSavings * hourlyRate;
+  const revenueIncrease = callVolume * conversionRate * 100; // est. added rev
+
+  const totalMonthlySavings = laborSavings + revenueIncrease;
+  const annualSavings = totalMonthlySavings * 12;
+  const roi = ((annualSavings - monthlyCost * 12) / (monthlyCost * 12)) * 100;
+  const payback = (monthlyCost * 12) / annualSavings * 12;
+
+  // Update UI
+  document.getElementById("monthly-savings").textContent = "$" + totalMonthlySavings.toLocaleString();
+  document.getElementById("annual-savings").textContent = "$" + annualSavings.toLocaleString();
+  document.getElementById("roi-percentage").textContent = roi.toFixed(1) + "%";
+  document.getElementById("payback-period").textContent = payback.toFixed(1) + " months";
+
+  // Chart
+  const ctx = document.getElementById('roiChart').getContext('2d');
+  if (window.roiChartInstance) window.roiChartInstance.destroy();
+  window.roiChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Annual Savings', 'Annual Cost'],
+      datasets: [{
+        data: [annualSavings, monthlyCost * 12],
+        backgroundColor: ['#00c8ff', '#333']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: "#fff" } }
+      }
+    }
+  });
+}
+</script>

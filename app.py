@@ -17,8 +17,13 @@ import traceback
 # ---------------------
 # Flask Setup
 # ---------------------
-app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey-change-this-in-production")  # UPDATED
+template_dir = os.path.abspath('templates')
+static_dir = os.path.abspath('static')
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey-change-this-in-production")
+
+# Ensure instance folder exists
+os.makedirs(app.instance_path, exist_ok=True)
 
 # Ensure instance folder exists
 os.makedirs(app.instance_path, exist_ok=True)

@@ -148,6 +148,13 @@ def get_receptionist_db():
 # ---------------------
 @app.route("/")
 def index():
+    # Debug: Print what Flask sees
+    import os
+    print("=" * 50)
+    print("CURRENT DIRECTORY:", os.getcwd())
+    print("TEMPLATE FOLDER:", app.template_folder)
+    print("FILES IN TEMPLATE FOLDER:", os.listdir(app.template_folder) if os.path.exists(app.template_folder) else "FOLDER NOT FOUND")
+    print("=" * 50)
     return render_template("index.html")
 
 @app.route("/features")

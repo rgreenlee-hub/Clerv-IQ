@@ -82,19 +82,23 @@ except ImportError:
     TWILIO_AVAILABLE = False
 
 try:
+    from receptionist.brain import ReceptionistBrain
+    brain = ReceptionistBrain()
+    RECEPTIONIST_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: ReceptionistBrain not available: {e}")
+    brain = None
+    RECEPTIONIST_AVAILABLE = False
+
+# Analytics and Config are optional for now
+try:
     from Config import CLIENTS
     from Analytics import Analytics
-    from receptionist.brain import ReceptionistBrain
-    RECEPTIONIST_AVAILABLE = True
-    brain = ReceptionistBrain()
     analytics = Analytics()
 except ImportError as e:
-    print(f"Warning: Receptionist module not available: {e}")
-    RECEPTIONIST_AVAILABLE = False
+    print(f"Warning: Analytics module not available: {e}")
     CLIENTS = []
-    brain = None
     analytics = None
-
 # ---------------------
 # User Model
 # ---------------------

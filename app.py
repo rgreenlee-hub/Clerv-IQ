@@ -12,6 +12,19 @@ from flask_mail import Mail, Message
 from dashboard import dashboard_bp
 from auth import auth_bp  # ADDED
 
+import traceback
+
+# Enable detailed error output
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
+@app.errorhandler(500)
+def internal_error(error):
+    print("=" * 50)
+    print("500 ERROR DETAILS:")
+    print(traceback.format_exc())
+    print("=" * 50)
+    return f"<pre>{traceback.format_exc()}</pre>", 500
+
 # ---------------------
 # Flask Setup
 # ---------------------

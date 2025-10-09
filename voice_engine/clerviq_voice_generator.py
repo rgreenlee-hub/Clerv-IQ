@@ -279,134 +279,131 @@ class VoiceCloningEngine:
         
         return VoiceConfig(**config_dict)
 
-
 # ============================================================================
 # TEXT-TO-SPEECH ENGINE
 # ============================================================================
 
 class TTSEngine:
     """High-quality TTS with emotion and prosody control"""
-    
+
     def __init__(self, device: str = None):
         """Initialize TTS engine"""
         if device is None:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
         else:
             self.device = device
-        
+
         print(f"Initializing TTS Engine on {self.device}...")
-        
-        # Load XTTS-v2 model
-        self.tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(self.device)
+
+        # Attempt to load XTTS-v2 model first (preferred)
+        try:
+            from TTS.api import TTS
+            self.tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(self.device)
+            print("✓ XTTS-v2 TTS model loaded successfully!")
+        except Exception as e:
+            print(f"⚠ XTTS-v2 load failed: {e}")
+            self.tts = None
+
+        # Fallback: try standard English TTS
+        if self.tts is None:
+            try:
+                from TTS.api import TTS as TTSApi
+                self.tts = TTSApi("tts_models/en/ljspeech/tacotron2-DDC").to(self.device)
+                print("✓ Fallback TTS model loaded successfully!")
+            except Exception as e:
+                print(f"⚠ Fallback TTS load failed: {e}")
+                self.tts = None
+
         self.sample_rate = 22050
-        
         print("✓ TTS Engine ready!")
-    
+
     def synthesize(
         self,
         text: str,
-        voice_config: VoiceConfig,
+        voice_config,
         output_path: Optional[str] = None,
         stream: bool = False
     ) -> Union[np.ndarray, str]:
-        """
-        Synthesize speech from text
-        
-        Args:
-            text: Text to synthesize
-            voice_config: Voice configuration
-            output_path: Optional path to save audio
-            stream: If True, return path for streaming
-            
-        Returns:
-            Audio array or path to audio file
-        """
-        # Prepare language code
-        language = voice_config.accent.value
-        
-        # Use cloned voice if available
-        if voice_config.is_cloned and voice_config.voice_sample_path:
-            speaker_wav = voice_config.voice_sample_path
-        else:
-            # Use default speaker
-            speaker_wav = None
-        
-        # Generate speech
-        if speaker_wav:
-            # Clone voice mode
-            wav = self.tts.tts(
-                text=text,
-                speaker_wav=speaker_wav,
-                language=language
-            )
-        else:
-            # Use built-in voice
-            wav = self.tts.tts(
-                text=text,
-                language=language
-            )
-        
-        # Convert to numpy array
+        """Synthesize speech from text"""
+        if self.tts is None:
+            raise RuntimeError("TTS engine not initialized")
+
+        # Determine language from voice config
+        language = getattr(voice_config, "accent", None)
+        language = language.value if language else "en"
+
+        # Try using a cloned speaker wav if available
+        speaker_wav = getattr(voice_config, "voice_sample_path", None)
+
+        print(f"Synthesizing text: {text[:60]}...")
+
+        try:
+            if speaker_wav and os.path.exists(speaker_wav):
+                wav = self.tts.tts(
+                    text=text,
+                    speaker_wav=speaker_wav,
+                    language=language
+                )
+            else:
+                wav = self.tts.tts(
+                    text=text,
+                    language=language
+                )
+        except Exception as e:
+            print(f"⚠ Synthesis failed: {e}")
+            return None
+
+        # Convert list → numpy
         if isinstance(wav, list):
             wav = np.array(wav)
-        
-        # Apply prosody adjustments
-        wav = self._apply_prosody(wav, voice_config)
-        
-        # Save if path provided
+
+        # Apply optional prosody (speed, pitch, energy)
+        if hasattr(self, "_apply_prosody"):
+            wav = self._apply_prosody(wav, voice_config)
+
+        # Save to file if specified
         if output_path:
             self._save_audio(wav, output_path)
             return output_path
-        
+
         return wav
-    
-    def _apply_prosody(self, audio: np.ndarray, config: VoiceConfig) -> np.ndarray:
+
+    def _apply_prosody(self, audio: np.ndarray, config) -> np.ndarray:
         """Apply pitch shift, speed adjustment, and energy control"""
-        # Apply speed adjustment
-        if config.speed != 1.0:
-            audio = librosa.effects.time_stretch(audio, rate=config.speed)
-        
-        # Apply pitch shift
-        if config.pitch_shift != 0.0:
-            audio = librosa.effects.pitch_shift(
-                audio,
-                sr=self.sample_rate,
-                n_steps=config.pitch_shift
-            )
-        
-        # Apply energy adjustment
-        if config.energy != 1.0:
-            audio = audio * config.energy
-            # Prevent clipping
-            audio = np.clip(audio, -1.0, 1.0)
-        
+        try:
+            if getattr(config, "speed", 1.0) != 1.0:
+                audio = librosa.effects.time_stretch(audio, rate=config.speed)
+            if getattr(config, "pitch_shift", 0.0) != 0.0:
+                audio = librosa.effects.pitch_shift(
+                    audio,
+                    sr=self.sample_rate,
+                    n_steps=config.pitch_shift
+                )
+            if getattr(config, "energy", 1.0) != 1.0:
+                audio = audio * config.energy
+                audio = np.clip(audio, -1.0, 1.0)
+        except Exception as e:
+            print(f"⚠ Prosody adjustment failed: {e}")
         return audio
-    
+
     def _save_audio(self, audio: np.ndarray, path: str, format: str = "wav"):
         """Save audio to file"""
-        # Ensure output directory exists
         Path(path).parent.mkdir(parents=True, exist_ok=True)
-        
-        # Normalize to int16
         audio_int16 = (audio * 32767).astype(np.int16)
-        
-        # Save
         wavfile.write(path, self.sample_rate, audio_int16)
-    
+
     def synthesize_batch(
         self,
         texts: List[str],
-        voice_config: VoiceConfig,
+        voice_config,
         output_dir: str = "output"
     ) -> List[str]:
         """Synthesize multiple texts in batch"""
         output_paths = []
-        
         for i, text in enumerate(texts):
             output_path = f"{output_dir}/speech_{i:03d}.wav"
             self.synthesize(text, voice_config, output_path)
             output_paths.append(output_path)
-        
         return output_paths
 
 

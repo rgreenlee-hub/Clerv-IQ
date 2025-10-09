@@ -24,8 +24,9 @@ os.makedirs(app.instance_path, exist_ok=True)
 # ---------------------
 # Register Blueprints
 # ---------------------
-from receptionist_bridge import bridge_bp
-app.register_blueprint(bridge_bp, url_prefix="/api/receptionist")
+# TEMPORARILY DISABLED - will fix after site is live
+# from receptionist_bridge import bridge_bp
+# app.register_blueprint(bridge_bp, url_prefix="/api/receptionist")
 app.register_blueprint(dashboard_bp)
 app.register_blueprint(auth_bp)  # ADDED
 
@@ -81,13 +82,24 @@ except ImportError:
     print("Warning: Twilio not available")
     TWILIO_AVAILABLE = False
 
-# Disable receptionist features for now - focus on getting site live
-RECEPTIONIST_AVAILABLE = False
-brain = None
-analytics = None
-CLIENTS = []
+try:
+    from receptionist.brain import ReceptionistBrain
+    brain = ReceptionistBrain()
+    RECEPTIONIST_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: ReceptionistBrain not available: {e}")
+    brain = None
+    RECEPTIONIST_AVAILABLE = False
 
-print("Receptionist features disabled - site running in basic mode")
+# Analytics and Config are optional for now
+try:
+    from Config import CLIENTS
+    from Analytics import Analytics
+    analytics = Analytics()
+except ImportError as e:
+    print(f"Warning: Analytics module not available: {e}")
+    CLIENTS = []
+    analytics = None
 # ---------------------
 # User Model
 # ---------------------
@@ -350,34 +362,35 @@ def terms():
 # ---------------------
 # API Endpoints - Connect Calls Page
 # ---------------------
-from receptionist.elite_ai_receptionist import EliteAIReceptionist
+# TEMPORARILY DISABLED
+# from receptionist.elite_ai_receptionist import EliteAIReceptionist
 
-@app.route('/api/calls', methods=['GET'])
-def get_calls_data():
-    try:
-        from receptionist.elite_ai_receptionist import EliteAIReceptionist
-        receptionist = EliteAIReceptionist()  # Now works without params
-        call_stats = receptionist.get_call_stats()
-        return jsonify(call_stats)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+# @app.route('/api/calls', methods=['GET'])
+# def get_calls_data():
+#     try:
+#         from receptionist.elite_ai_receptionist import EliteAIReceptionist
+#         receptionist = EliteAIReceptionist()  # Now works without params
+#         call_stats = receptionist.get_call_stats()
+#         return jsonify(call_stats)
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
-@app.route('/sms')
-def sms_dashboard():
-    from receptionist.elite_ai_receptionist import get_sms_data
-    sms_data = get_sms_data()
-    return render_template('sms.html', data=sms_data)
+# @app.route('/sms')
+# def sms_dashboard():
+#     from receptionist.elite_ai_receptionist import get_sms_data
+#     sms_data = get_sms_data()
+#     return render_template('sms.html', data=sms_data)
 
-@app.route("/analytics")
-def analytics_page():
-    from elite_ai_receptionist import EliteAIReceptionist
-    from Config import CLIENTS
+# @app.route("/analytics")
+# def analytics_page():
+#     from elite_ai_receptionist import EliteAIReceptionist
+#     from Config import CLIENTS
 
-    # use your test or first client
-    receptionist = EliteAIReceptionist(CLIENTS[0])
-    analytics_data = receptionist.get_analytics()
+#     # use your test or first client
+#     receptionist = EliteAIReceptionist(CLIENTS[0])
+#     analytics_data = receptionist.get_analytics()
 
-    return render_template("analytics.html", analytics_data=analytics_data)
+#     return render_template("analytics.html", analytics_data=analytics_data)
 
 # ---------------------
 # Startup

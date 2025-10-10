@@ -111,9 +111,9 @@
       <!-- Step 1: Company Basics -->
       <div class="onboarding-step active">
         <p>What's your company name?</p>
-        <input type="text" name="company" placeholder="e.g. Apex Dental Group" required>
+        <input type="text" name="company" placeholder="e.g. Apex Dental Group">
         <p>Industry</p>
-        <select name="industry" required>
+        <select name="industry">
           <option value="">Select industry</option>
           <option>Real Estate</option>
           <option>Dental / Med Spa</option>
@@ -129,13 +129,13 @@
       <!-- Step 2: Contact -->
       <div class="onboarding-step">
         <p>Preferred Contact Email</p>
-        <input type="email" name="contact_email" placeholder="you@company.com" required>
+        <input type="email" name="contact_email" placeholder="you@company.com">
         <p>Create Password</p>
-        <input type="password" name="password" placeholder="Minimum 8 characters" required minlength="8">
+        <input type="password" name="password" placeholder="Minimum 8 characters" minlength="8">
         <p>Confirm Password</p>
-        <input type="password" name="confirm_password" placeholder="Re-enter password" required>
+        <input type="password" name="confirm_password" placeholder="Re-enter password">
         <p>Preferred Contact Phone</p>
-        <input type="tel" name="phone" placeholder="(123) 456-7890" required>
+        <input type="tel" name="phone" placeholder="(123) 456-7890">
         <p>Preferred SMS Number</p>
         <input type="tel" name="sms" placeholder="(123) 456-7890">
         <button type="button" onclick="nextStep()">Next</button>
@@ -144,7 +144,7 @@
       <!-- Step 3: Business Profile -->
       <div class="onboarding-step">
         <p>Annual Revenue</p>
-        <input type="number" name="revenue" placeholder="$1,000,000" required>
+        <input type="number" name="revenue" placeholder="$1,000,000">
         <p>Average Client Value</p>
         <input type="number" name="client_value" placeholder="$5000">
         <p>Average Monthly Leads</p>
@@ -161,7 +161,7 @@
   <input type="text" name="hours" placeholder="Mon-Fri 9AM-5PM">
 
   <p>Company Website</p>
-  <input type="url" name="website" placeholder="https://yourcompany.com" required>
+  <input type="url" name="website" placeholder="https://yourcompany.com">
 
   <p>Link to Online Calendar (Google/Outlook/Calendly)</p>
   <input type="url" name="calendar" placeholder="https://calendly.com/your-link">
@@ -182,7 +182,7 @@
       <!-- Step 5: Goals -->
       <div class="onboarding-step">
         <p>Primary Goal</p>
-        <select name="primary_goal" required>
+        <select name="primary_goal">
           <option value="">Choose</option>
           <option>More Leads</option>
           <option>Better Follow-Up</option>
@@ -268,7 +268,7 @@
         <input type="checkbox" name="gdpr"> GDPR<br>
         <input type="checkbox" name="ccpa"> CCPA<br>
         <input type="checkbox" name="none"> None<br>
-        <p><input type="checkbox" name="consent" required> I consent to SMS/Email communication</p>
+        <p><input type="checkbox" name="consent"> I consent to SMS/Email communication</p>
         <button type="button" onclick="nextStep()">Next</button>
       </div>
 
@@ -278,7 +278,7 @@
   <p>Enter your business phone number to enable AI answering.</p>
   
   <div id="phone-host-form">
-    <input type="tel" id="phone-to-host" placeholder="+1 (555) 123-4567" required>
+    <input type="tel" id="phone-to-host" placeholder="+1 (555) 123-4567">
     <button type="button" onclick="hostPhoneNumber()">Send Verification Code</button>
   </div>
   
@@ -307,12 +307,12 @@
         <!-- Contact Info -->
         <div class="form-row">
           <label for="billing-name">Full Name</label>
-          <input type="text" id="billing-name" placeholder="John Doe" required>
+          <input type="text" id="billing-name" placeholder="John Doe">
         </div>
 
         <div class="form-row">
           <label for="billing-email">Email Address</label>
-          <input type="email" id="billing-email" placeholder="john@company.com" required>
+          <input type="email" id="billing-email" placeholder="john@company.com">
         </div>
 
         <div class="form-row">
@@ -323,27 +323,27 @@
         <!-- Address -->
         <div class="form-row">
           <label for="billing-address">Street Address</label>
-          <input type="text" id="billing-address" placeholder="123 Main St" required>
+          <input type="text" id="billing-address" placeholder="123 Main St">
         </div>
 
         <div class="form-row">
           <label for="billing-city">City</label>
-          <input type="text" id="billing-city" placeholder="San Diego" required>
+          <input type="text" id="billing-city" placeholder="San Diego">
         </div>
 
         <div class="form-row">
           <label for="billing-state">State / Province</label>
-          <input type="text" id="billing-state" placeholder="CA" required>
+          <input type="text" id="billing-state" placeholder="CA">
         </div>
 
         <div class="form-row">
           <label for="billing-zip">Postal / ZIP Code</label>
-          <input type="text" id="billing-zip" placeholder="92101" required>
+          <input type="text" id="billing-zip" placeholder="92101">
         </div>
 
         <div class="form-row">
           <label for="billing-country">Country</label>
-          <input type="text" id="billing-country" placeholder="United States" required>
+          <input type="text" id="billing-country" placeholder="United States">
         </div>
 
         <!-- Card Info -->
@@ -377,12 +377,27 @@
     const progress = document.querySelectorAll(".step");
 
     function nextStep() {
-      // Collect data from current step
-      const form = document.getElementById("onboardingForm");
-      const formData = new FormData(form);
-      for (let [key, value] of formData.entries()) {
-        userData[key] = value;
+      // Only validate inputs in the current step
+      const currentStepElement = steps[currentStep];
+      const requiredInputs = currentStepElement.querySelectorAll('[required]');
+      
+      // Check if all required fields in current step are filled
+      for (let input of requiredInputs) {
+        if (!input.value) {
+          alert('Please fill in all required fields');
+          return;
+        }
       }
+      
+      // Collect data from current step
+      const inputs = currentStepElement.querySelectorAll('input, select');
+      inputs.forEach(input => {
+        if (input.type === 'checkbox') {
+          userData[input.name] = input.checked;
+        } else {
+          userData[input.name] = input.value;
+        }
+      });
 
       // Validate password match in step 2
       if (currentStep === 1) {
@@ -527,59 +542,72 @@
       }
     });
 
-// Phone Number Hosting Functions
-async function hostPhoneNumber() {
-  const phoneInput = document.getElementById('phone-to-host');
-  const phone = phoneInput.value;
-  
-  if (!phone) {
-    alert('Please enter a phone number');
-    return;
-  }
-  
-  try {
-    const response = await fetch('/onboarding/host-number', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({phone_number: phone})
-    });
-    
-    const result = await response.json();
-    
-    if (result.success) {
-      document.getElementById('phone-host-form').style.display = 'none';
-      document.getElementById('otp-verification').style.display = 'block';
-      alert('Verification code sent! Check your phone.');
-    } else {
-      alert('Error: ' + result.error);
+    // Phone Number Hosting Functions
+    async function hostPhoneNumber() {
+      const phoneInput = document.getElementById('phone-to-host');
+      const phone = phoneInput.value;
+      
+      if (!phone) {
+        alert('Please enter a phone number');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/onboarding/host-number', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({phone_number: phone})
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          document.getElementById('phone-host-form').style.display = 'none';
+          document.getElementById('otp-verification').style.display = 'block';
+          alert('Verification code sent! Check your phone.');
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (err) {
+        alert('Failed to send verification code: ' + err.message);
+      }
     }
-  } catch (err) {
-    alert('Failed to send verification code: ' + err.message);
-  }
-}
 
-async function verifyOTP() {
-  const otpInput = document.getElementById('otp-code');
-  const otp = otpInput.value;
-  
-  if (!otp || otp.length !== 6) {
-    alert('Please enter the 6-digit code');
-    return;
-  }
-  
-  try {
-    const response = await fetch('/onboarding/verify-otp', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({otp_code: otp})
-    });
-    
-    const result = await response.json();
-    
-    if (result.success) {
-      alert('✅ Phone number hosted successfully! Your AI receptionist is live.');
-      nextStep(); // Move to next onboarding step
-    } else {
+    async function verifyOTP() {
+      const otpInput = document.getElementById('otp-code');
+      const otp = otpInput.value;
+      
+      if (!otp || otp.length !== 6) {
+        alert('Please enter the 6-digit code');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/onboarding/verify-otp', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({otp_code: otp})
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('✅ Phone number hosted successfully! Your AI receptionist is live.');
+          nextStep();
+        } else {
+          alert('Verification failed: ' + result.error);
+        }
+      } catch (err) {
+        alert('Verification error: ' + err.message);
+      }
+    }
+
+    function skipPhoneHosting() {
+      const skipCheckbox = document.getElementById('skip-phone');
+      if (skipCheckbox.checked || confirm('Skip phone hosting for now?')) {
+        nextStep();
+      }
+    }
   </script>
 
 </body>

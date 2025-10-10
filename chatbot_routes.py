@@ -44,7 +44,7 @@ How It Works:
 """
 
 # Chatbot endpoint
-@app.route('/api/chat', methods=['POST'])
+@chatbot_bp.route('/api/chat', methods=['POST'])
 def chat():
     """Handle chatbot messages with OpenAI"""
     try:
@@ -126,7 +126,7 @@ Guidelines:
 
 
 # Save lead endpoint
-@app.route('/api/save-lead', methods=['POST'])
+@chatbot_bp.route('/api/save-lead', methods=['POST'])
 def save_lead():
     """Save lead information from chatbot"""
     try:
@@ -195,7 +195,7 @@ Conversation snippet:
 
 
 # Simple fallback chatbot (if OpenAI not available)
-@app.route('/api/chat-simple', methods=['POST'])
+@chatbot_bp.route('/api/chat-simple', methods=['POST'])
 def chat_simple():
     """Simple rule-based chatbot without OpenAI"""
     try:

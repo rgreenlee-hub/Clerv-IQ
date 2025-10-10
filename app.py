@@ -45,8 +45,8 @@ def internal_error(error):
 # TEMPORARILY DISABLED - will fix after site is live
 # from receptionist_bridge import bridge_bp
 # app.register_blueprint(bridge_bp, url_prefix="/api/receptionist")
-app.register_blueprint(dashboard_bp)
-app.register_blueprint(auth_bp)  # ADDED
+# app.register_blueprint(dashboard_bp)  # DISABLED TO TEST
+# app.register_blueprint(auth_bp)  # DISABLED TO TEST
 
 # ---------------------
 # Database

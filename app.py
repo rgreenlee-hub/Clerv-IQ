@@ -10,16 +10,10 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from dashboard import dashboard_bp
-from auth import auth_bp  # ADDED
+from auth import auth_bp
 from flask import send_from_directory
 
 import traceback
-
-
-from chatbot_routes import chatbot_bp
-
-# Register blueprint
-app.register_blueprint(chatbot_bp)
 
 
 # ---------------------
@@ -29,9 +23,6 @@ template_dir = os.path.abspath('templates')
 static_dir = os.path.abspath('static')
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey-change-this-in-production")
-
-# Ensure instance folder exists
-os.makedirs(app.instance_path, exist_ok=True)
 
 # Ensure instance folder exists
 os.makedirs(app.instance_path, exist_ok=True)
@@ -50,8 +41,11 @@ def internal_error(error):
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # ---------------------
-# Register Blueprints
+# Register Blueprints (MOVED HERE - AFTER APP CREATION)
 # ---------------------
+from chatbot_routes import chatbot_bp
+app.register_blueprint(chatbot_bp)
+
 # TEMPORARILY DISABLED - will fix after site is live
 # from receptionist_bridge import bridge_bp
 # app.register_blueprint(bridge_bp, url_prefix="/api/receptionist")

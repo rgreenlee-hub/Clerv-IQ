@@ -40,6 +40,8 @@ def internal_error(error):
     print("=" * 50)
     return f"<pre>{traceback.format_exc()}</pre>", 500
 
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
 # ---------------------
 # Register Blueprints
 # ---------------------

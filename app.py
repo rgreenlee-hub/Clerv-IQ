@@ -11,6 +11,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from flask_mail import Mail, Message
 from dashboard import dashboard_bp
 from auth import auth_bp  # ADDED
+from flask import send_from_directory
 
 import traceback
 
@@ -416,6 +417,15 @@ def terms():
 #     analytics_data = receptionist.get_analytics()
 
 #     return render_template("analytics.html", analytics_data=analytics_data)
+
+# ---------------------
+# Static file route for Render
+# ---------------------
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    static_dir = os.path.join(app.root_path, 'static')
+    return send_from_directory(static_dir, filename)
+
 
 # ---------------------
 # Startup

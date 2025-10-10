@@ -514,3 +514,13 @@
 2025-10-09 15:41:02 | INFO | 127.0.0.1 - - [09/Oct/2025 15:41:02] "GET /integrations HTTP/1.1" 200 -
 2025-10-09 15:41:15 | INFO | 127.0.0.1 - - [09/Oct/2025 15:41:15] "GET /leads HTTP/1.1" 200 -
 2025-10-09 15:41:17 | INFO | 127.0.0.1 - - [09/Oct/2025 15:41:17] "GET /emails HTTP/1.1" 200 -
+2025-10-10 12:52:38 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-10 12:52:38 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-10 12:52:38 | INFO |  * Restarting with stat
+2025-10-10 12:53:00 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-10 12:53:00 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-10 12:53:00 | INFO |  * Restarting with stat
+2025-10-10 12:53:04 | WARNING |  * Debugger is active!
+2025-10-10 12:53:04 | INFO |  * Debugger PIN: 381-694-395

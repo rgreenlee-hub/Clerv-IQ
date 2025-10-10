@@ -15,6 +15,13 @@ from flask import send_from_directory
 
 import traceback
 
+
+from chatbot_routes import chatbot_bp
+
+# Register blueprint
+app.register_blueprint(chatbot_bp)
+
+
 # ---------------------
 # Flask Setup
 # ---------------------

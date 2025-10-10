@@ -270,6 +270,96 @@ def onboarding():
     return render_template("onboarding.html")
 
 # ---------------------
+# Phone Number Hosting (Twilio)
+# ---------------------
+@app.route("/onboarding/host-number", methods=["POST"])
+@login_required
+def host_number():
+    """Initialize phone number hosting with Twilio"""
+    if not TWILIO_AVAILABLE:
+        return jsonify({"success": False, "error": "Twilio not configured"}), 400
+    
+    try:
+        from twilio.rest import Client
+        from flask import session
+        
+        phone_number = request.json.get("phone_number")
+        
+        # Initialize Twilio client
+        account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+        auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+        client = Client(account_sid, auth_token)
+        
+        # Create hosting request
+        hosted_number = client.hosted_numbers.create(
+            phone_number=phone_number,
+            friendly_name=f"ClervIQ - {current_user.email}"
+        )
+        
+        # Store in session for verification step
+        session['pending_number_sid'] = hosted_number.sid
+        session['pending_number'] = phone_number
+        
+        return jsonify({
+            "success": True,
+            "status": "otp_sent",
+            "sid": hosted_number.sid,
+            "message": f"Verification code sent to {phone_number}"
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/onboarding/verify-otp", methods=["POST"])
+@login_required
+def verify_otp():
+    """Verify OTP code for phone number"""
+    if not TWILIO_AVAILABLE:
+        return jsonify({"success": False, "error": "Twilio not configured"}), 400
+    
+    try:
+        from twilio.rest import Client
+        from flask import session
+        
+        otp_code = request.json.get("otp_code")
+        number_sid = session.get('pending_number_sid')
+        
+        if not number_sid:
+            return jsonify({"success": False, "error": "No pending verification"}), 400
+        
+        # Initialize Twilio client
+        account_sid = os.getenv("TWILIO_ACCOUNT_SID")
+        auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+        client = Client(account_sid, auth_token)
+        
+        # Verify OTP
+        client.hosted_numbers(number_sid).verification_attempts.create(
+            verification_code=otp_code
+        )
+        
+        # Configure webhook automatically
+        phone_number = session.get('pending_number')
+        webhook_url = url_for('voice', _external=True)
+        
+        client.incoming_phone_numbers.list(phone_number=phone_number)[0].update(
+            voice_url=webhook_url,
+            sms_url=url_for('sms', _external=True) if TWILIO_AVAILABLE else None
+        )
+        
+        # Clear session
+        session.pop('pending_number_sid', None)
+        session.pop('pending_number', None)
+        
+        return jsonify({
+            "success": True,
+            "message": "Number hosted successfully! Your AI receptionist is now live."
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# ---------------------
 # Stripe Billing
 # ---------------------
 @app.route("/create-checkout-session", methods=["POST"])

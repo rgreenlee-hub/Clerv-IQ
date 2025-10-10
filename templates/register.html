@@ -271,7 +271,30 @@
         <p><input type="checkbox" name="consent" required> I consent to SMS/Email communication</p>
         <button type="button" onclick="nextStep()">Next</button>
       </div>
-      <!-- Step 10: Review & Billing -->
+
+<!-- Step 10: Host Phone Number -->
+<div class="onboarding-step">
+  <h3 style="color:#00d4ff; margin-bottom:20px;">🎙️ Host Your Phone Number</h3>
+  <p>Enter your business phone number to enable AI answering.</p>
+  
+  <div id="phone-host-form">
+    <input type="tel" id="phone-to-host" placeholder="+1 (555) 123-4567" required>
+    <button type="button" onclick="hostPhoneNumber()">Send Verification Code</button>
+  </div>
+  
+  <div id="otp-verification" style="display:none;">
+    <p>We sent a verification code to your phone. Enter it below:</p>
+    <input type="text" id="otp-code" placeholder="Enter 6-digit code" maxlength="6">
+    <button type="button" onclick="verifyOTP()">Verify & Continue</button>
+  </div>
+  
+  <p style="margin-top:20px; font-size:12px; color:#888;">
+    <input type="checkbox" id="skip-phone"> Skip for now (you can add this later in dashboard)
+  </p>
+  <button type="button" onclick="skipPhoneHosting()" style="background:#555;">Skip This Step</button>
+</div>
+
+      <!-- Step 11: Review & Billing -->
     <div class="onboarding-step">
       <p>Review your details before continuing:</p>
       <div class="review" id="reviewBox"></div>
@@ -503,6 +526,60 @@
         submitBtn.textContent = "Pay & Go to Dashboard →";
       }
     });
+
+// Phone Number Hosting Functions
+async function hostPhoneNumber() {
+  const phoneInput = document.getElementById('phone-to-host');
+  const phone = phoneInput.value;
+  
+  if (!phone) {
+    alert('Please enter a phone number');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/onboarding/host-number', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({phone_number: phone})
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      document.getElementById('phone-host-form').style.display = 'none';
+      document.getElementById('otp-verification').style.display = 'block';
+      alert('Verification code sent! Check your phone.');
+    } else {
+      alert('Error: ' + result.error);
+    }
+  } catch (err) {
+    alert('Failed to send verification code: ' + err.message);
+  }
+}
+
+async function verifyOTP() {
+  const otpInput = document.getElementById('otp-code');
+  const otp = otpInput.value;
+  
+  if (!otp || otp.length !== 6) {
+    alert('Please enter the 6-digit code');
+    return;
+  }
+  
+  try {
+    const response = await fetch('/onboarding/verify-otp', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({otp_code: otp})
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert('✅ Phone number hosted successfully! Your AI receptionist is live.');
+      nextStep(); // Move to next onboarding step
+    } else {
   </script>
 
 </body>

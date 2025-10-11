@@ -1,8 +1,8 @@
 """
 Password reset functionality
 """
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_mail import Message
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask_mail import Message, Mail
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 import os
 
@@ -10,16 +10,15 @@ password_reset_bp = Blueprint('password_reset', __name__)
 
 # Serializer for generating secure tokens
 def get_serializer():
-    from app import app
-    return URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
 
 def send_reset_email(email, reset_url):
     """Send password reset email"""
-    from app import mail
+    mail = Mail(current_app)
     
     msg = Message(
         "ClervIQ - Password Reset Request",
-        sender=os.getenv('MAIL_USERNAME', 'noreply@clerviq.com'),
+        sender=current_app.config.get('MAIL_USERNAME', 'noreply@clerviq.com'),
         recipients=[email]
     )
     
@@ -70,7 +69,11 @@ def send_reset_email(email, reset_url):
     </html>
     """
     
-    mail.send(msg)
+    try:
+        mail.send(msg)
+    except Exception as e:
+        print(f"Mail send error: {e}")
+        raise
 
 @password_reset_bp.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
@@ -78,27 +81,36 @@ def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
         
+        # Import here to avoid circular import
         from app import User
-        user = User.query.filter_by(email=email).first()
         
-        if user:
-            # Generate reset token
-            serializer = get_serializer()
-            token = serializer.dumps(email, salt='password-reset-salt')
+        try:
+            user = User.query.filter_by(email=email).first()
             
-            # Create reset URL
-            reset_url = url_for('password_reset.reset_password', token=token, _external=True)
-            
-            # Send email
-            try:
-                send_reset_email(email, reset_url)
-                flash('Password reset link sent to your email!', 'success')
-            except Exception as e:
-                print(f"Error sending email: {e}")
-                flash('Error sending email. Please try again.', 'error')
-        else:
-            # Don't reveal if email exists or not (security)
-            flash('If that email exists, a reset link has been sent.', 'info')
+            if user:
+                # Generate reset token
+                serializer = get_serializer()
+                token = serializer.dumps(email, salt='password-reset-salt')
+                
+                # Create reset URL
+                reset_url = url_for('password_reset.reset_password', token=token, _external=True)
+                
+                # Send email
+                try:
+                    send_reset_email(email, reset_url)
+                    flash('Password reset link sent to your email!', 'success')
+                except Exception as e:
+                    print(f"Error sending email: {e}")
+                    # Still show success message for security (don't reveal if email exists)
+                    flash('If that email exists, a reset link has been sent.', 'info')
+            else:
+                # Don't reveal if email exists or not (security)
+                flash('If that email exists, a reset link has been sent.', 'info')
+        except Exception as e:
+            print(f"Error in forgot_password: {e}")
+            import traceback
+            traceback.print_exc()
+            flash('An error occurred. Please try again.', 'error')
         
         return redirect(url_for('password_reset.forgot_password'))
     
@@ -133,15 +145,23 @@ def reset_password(token):
         
         # Update password
         from app import User, db, bcrypt
-        user = User.query.filter_by(email=email).first()
         
-        if user:
-            user.password = bcrypt.generate_password_hash(password).decode('utf-8')
-            db.session.commit()
-            flash('Password reset successful! Please login.', 'success')
-            return redirect(url_for('login'))
-        else:
-            flash('User not found.', 'error')
+        try:
+            user = User.query.filter_by(email=email).first()
+            
+            if user:
+                user.password = bcrypt.generate_password_hash(password).decode('utf-8')
+                db.session.commit()
+                flash('Password reset successful! Please login.', 'success')
+                return redirect(url_for('login'))
+            else:
+                flash('User not found.', 'error')
+                return redirect(url_for('password_reset.forgot_password'))
+        except Exception as e:
+            print(f"Error resetting password: {e}")
+            import traceback
+            traceback.print_exc()
+            flash('An error occurred. Please try again.', 'error')
             return redirect(url_for('password_reset.forgot_password'))
     
     return render_template('reset_password.html', token=token)

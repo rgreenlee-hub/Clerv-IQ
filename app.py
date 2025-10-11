@@ -280,7 +280,6 @@ def onboarding():
 # Phone Number Hosting (Twilio)
 # ---------------------
 @app.route("/onboarding/host-number", methods=["POST"])
-@login_required
 def host_number():
     """Initialize phone number hosting with Twilio"""
     if not TWILIO_AVAILABLE:
@@ -319,7 +318,6 @@ def host_number():
 
 
 @app.route("/onboarding/verify-otp", methods=["POST"])
-@login_required
 def verify_otp():
     """Verify OTP code for phone number"""
     if not TWILIO_AVAILABLE:

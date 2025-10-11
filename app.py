@@ -46,11 +46,13 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 from chatbot_routes import chatbot_bp
 app.register_blueprint(chatbot_bp)
 
-# TEMPORARILY DISABLED - will fix after site is live
+# ENABLE EVERYTHING! 🔥
+app.register_blueprint(dashboard_bp)  # ✅ ENABLED
+app.register_blueprint(auth_bp)  # ✅ ENABLED
+
+# Note: receptionist_bridge commented out if not ready yet
 # from receptionist_bridge import bridge_bp
 # app.register_blueprint(bridge_bp, url_prefix="/api/receptionist")
-# app.register_blueprint(dashboard_bp)  # DISABLED TO TEST
-# app.register_blueprint(auth_bp)  # DISABLED TO TEST
 
 # ---------------------
 # Database

@@ -485,6 +485,75 @@ def terms():
 
 
 # ---------------------
+# Emergency DB Init (TEMPORARY - for Render)
+# ---------------------
+@app.route("/init-db-now-delete-after")
+def init_db_emergency():
+    """Force database creation - DELETE THIS ROUTE AFTER USE!"""
+    try:
+        db.create_all()
+        
+        # Create admin if doesn't exist
+        if not User.query.filter_by(email="admin@example.com").first():
+            admin = User(
+                email="admin@example.com",
+                password=bcrypt.generate_password_hash("password123").decode("utf-8"),
+                onboarding_complete=True,
+                client_id=1
+            )
+            db.session.add(admin)
+            db.session.commit()
+        
+        # Create demo if doesn't exist
+        if not User.query.filter_by(email="demo@clerviq.com").first():
+            demo = User(
+                email="demo@clerviq.com",
+                password=bcrypt.generate_password_hash("Demo2024!").decode("utf-8"),
+                onboarding_complete=True,
+                client_id=1
+            )
+            db.session.add(demo)
+            db.session.commit()
+        
+        return """
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: 'Courier New', monospace;
+                    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+                    color: #e8f0ff;
+                    padding: 50px;
+                }
+                h1 { color: #00d4ff; }
+                .success { background: rgba(0, 255, 170, 0.1); padding: 20px; border-radius: 10px; border: 1px solid #00ffaa; }
+                .warning { background: rgba(255, 77, 77, 0.1); padding: 20px; border-radius: 10px; border: 1px solid #ff4d4d; margin-top: 20px; }
+                a { color: #00d4ff; text-decoration: none; font-weight: bold; }
+                a:hover { text-decoration: underline; }
+            </style>
+        </head>
+        <body>
+            <div class="success">
+                <h1>✅ Database Initialized!</h1>
+                <p><strong>Users created:</strong></p>
+                <ul>
+                    <li>admin@example.com / password123</li>
+                    <li>demo@clerviq.com / Demo2024!</li>
+                </ul>
+            </div>
+            <div class="warning">
+                <p><strong>⚠️ NOW DELETE THIS ROUTE FROM CODE!</strong></p>
+                <p>Remove the /init-db-now-delete-after route from app.py and redeploy.</p>
+            </div>
+            <p style="margin-top: 30px;"><a href='/login'>→ Go to Login</a></p>
+        </body>
+        </html>
+        """
+    except Exception as e:
+        return f"<pre>Error: {str(e)}</pre>", 500
+
+
+# ---------------------
 # API Endpoints - Connect Calls Page
 # ---------------------
 # TEMPORARILY DISABLED
@@ -547,7 +616,7 @@ if __name__ == "__main__":
         else:
             print("Admin user already exists")
 
-        # ✅ ADD YOUR DEMO ACCOUNT
+        # ✅ DEMO ACCOUNT
         if not User.query.filter_by(email="demo@clerviq.com").first():
             demo_user = User(
                 email="demo@clerviq.com",
@@ -560,3 +629,6 @@ if __name__ == "__main__":
             print("Demo user created: demo@clerviq.com / Demo2024!")
         else:
             print("Demo user already exists")
+
+    print("Starting Flask app...")
+    app.run(debug=True, port=5000)

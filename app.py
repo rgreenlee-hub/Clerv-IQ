@@ -4,7 +4,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'recepti
 
 
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, Response
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file, Response, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -233,7 +233,7 @@ def register():
         password = request.form.get("password", "")
         
         if User.query.filter_by(email=email).first():
-            return render_template("register.html", error="Email already exists")
+            return render_template("register.html", error="Email already exists", stripe_public_key=STRIPE_PUBLIC_KEY)
         
         hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
         
@@ -277,95 +277,163 @@ def onboarding():
     return render_template("onboarding.html")
 
 # ---------------------
-# Phone Number Hosting (Twilio)
+# Phone Number Hosting (Twilio) - UPDATED
 # ---------------------
 @app.route("/onboarding/host-number", methods=["POST"])
 def host_number():
-    """Initialize phone number hosting with Twilio"""
-    if not TWILIO_AVAILABLE:
-        return jsonify({"success": False, "error": "Twilio not configured"}), 400
-    
+    """Send verification code to phone number"""
     try:
         from twilio.rest import Client
-        from flask import session
         
         phone_number = request.json.get("phone_number")
         
-        # Initialize Twilio client
+        if not phone_number:
+            return jsonify({"success": False, "error": "Phone number required"}), 400
+        
+        # Check if Twilio is configured
         account_sid = os.getenv("TWILIO_ACCOUNT_SID")
         auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+        
+        if not account_sid or not auth_token or not TWILIO_AVAILABLE:
+            # No Twilio? Just save the number for manual setup
+            session['pending_phone'] = phone_number
+            return jsonify({
+                "success": True,
+                "status": "saved",
+                "message": "Phone number saved. We'll verify and set it up within 24-48 hours.",
+                "skip_otp": True
+            })
+        
+        # Twilio is configured - send verification SMS
         client = Client(account_sid, auth_token)
         
-        # Create hosting request
-        hosted_number = client.hosted_numbers.create(
-            phone_number=phone_number,
-            friendly_name=f"ClervIQ - {current_user.email}"
-        )
+        # Create or get verification service
+        try:
+            services = client.verify.v2.services.list(limit=1)
+            if services:
+                verification_service = services[0]
+            else:
+                verification_service = client.verify.v2.services.create(
+                    friendly_name='ClervIQ Phone Verification'
+                )
+        except:
+            verification_service = client.verify.v2.services.create(
+                friendly_name='ClervIQ Phone Verification'
+            )
         
-        # Store in session for verification step
-        session['pending_number_sid'] = hosted_number.sid
-        session['pending_number'] = phone_number
+        # Send verification code
+        verification = client.verify.v2.services(verification_service.sid) \
+            .verifications.create(
+                to=phone_number,
+                channel='sms'
+            )
+        
+        # Store in session
+        session['verification_sid'] = verification_service.sid
+        session['pending_phone'] = phone_number
         
         return jsonify({
             "success": True,
             "status": "otp_sent",
-            "sid": hosted_number.sid,
             "message": f"Verification code sent to {phone_number}"
         })
         
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        print(f"Phone verification error: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Fallback: just save the number
+        session['pending_phone'] = request.json.get("phone_number")
+        return jsonify({
+            "success": True,
+            "status": "saved",
+            "message": "Phone number saved. We'll verify and set it up within 24-48 hours.",
+            "skip_otp": True
+        })
 
 
 @app.route("/onboarding/verify-otp", methods=["POST"])
 def verify_otp():
-    """Verify OTP code for phone number"""
-    if not TWILIO_AVAILABLE:
-        return jsonify({"success": False, "error": "Twilio not configured"}), 400
-    
+    """Verify OTP code"""
     try:
         from twilio.rest import Client
-        from flask import session
         
         otp_code = request.json.get("otp_code")
-        number_sid = session.get('pending_number_sid')
+        verification_sid = session.get('verification_sid')
+        phone_number = session.get('pending_phone')
         
-        if not number_sid:
+        if not verification_sid or not phone_number:
             return jsonify({"success": False, "error": "No pending verification"}), 400
         
-        # Initialize Twilio client
+        # Check Twilio config
         account_sid = os.getenv("TWILIO_ACCOUNT_SID")
         auth_token = os.getenv("TWILIO_AUTH_TOKEN")
+        
+        if not account_sid or not auth_token:
+            return jsonify({"success": False, "error": "Twilio not configured"}), 400
+        
         client = Client(account_sid, auth_token)
         
-        # Verify OTP
-        client.hosted_numbers(number_sid).verification_attempts.create(
-            verification_code=otp_code
-        )
+        # Verify the code
+        verification_check = client.verify.v2.services(verification_sid) \
+            .verification_checks.create(
+                to=phone_number,
+                code=otp_code
+            )
         
-        # Configure webhook automatically
-        phone_number = session.get('pending_number')
-        webhook_url = url_for('voice', _external=True)
-        
-        client.incoming_phone_numbers.list(phone_number=phone_number)[0].update(
-            voice_url=webhook_url,
-            sms_url=url_for('sms', _external=True) if TWILIO_AVAILABLE else None
-        )
-        
-        # Clear session
-        session.pop('pending_number_sid', None)
-        session.pop('pending_number', None)
-        
-        return jsonify({
-            "success": True,
-            "message": "Number hosted successfully! Your AI receptionist is now live."
-        })
+        if verification_check.status == 'approved':
+            # Success! Store verified phone
+            session['verified_phone'] = phone_number
+            session.pop('verification_sid', None)
+            session.pop('pending_phone', None)
+            
+            # Notify you about the verified phone
+            try:
+                msg = Message(
+                    f"New Phone Number Verified - Needs Hosting",
+                    sender=app.config['MAIL_USERNAME'],
+                    recipients=[app.config['MAIL_USERNAME']]  # Change to your email
+                )
+                msg.body = f"""
+New customer verified their phone number:
+
+Phone: {phone_number}
+
+ACTION REQUIRED:
+1. Go to Twilio Console: https://console.twilio.com/us1/develop/phone-numbers/port-host/hosted-numbers
+2. Click "Host a Number"
+3. Enter: {phone_number}
+4. Submit hosting request
+5. Takes 1-2 days to complete
+
+Customer is waiting!
+                """
+                mail.send(msg)
+            except Exception as e:
+                print(f"Notification email failed: {e}")
+            
+            return jsonify({
+                "success": True,
+                "message": "✅ Phone verified! We'll complete hosting setup within 24-48 hours."
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Invalid code. Please try again."
+            }), 400
         
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        print(f"OTP verification error: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "error": f"Verification failed. Please try again or skip this step."
+        }), 400
 
 # ---------------------
-# Stripe Billing
+# Stripe Billing - UPDATED FOR BETA
 # ---------------------
 @app.route("/create-checkout-session", methods=["POST"])
 @login_required
@@ -386,33 +454,25 @@ def create_checkout_session():
     except Exception as e:
         return jsonify(error=str(e)), 403
 
-# ADDED: Stripe payment endpoint for register.html
+# UPDATED: Free beta testing mode
 @app.route("/charge", methods=["POST"])
 def charge():
-    """Handle Stripe payment from registration wizard"""
-    if not STRIPE_AVAILABLE:
-        return jsonify({"success": False, "error": "Stripe not configured"}), 400
-    
+    """Handle Stripe payment from registration wizard - BETA TESTING MODE"""
     try:
         data = request.json
-        payment_method_id = data.get("payment_method")
         billing = data.get("billing", {})
         
-        # Create a payment intent (adjust amount as needed)
-        payment_intent = stripe.PaymentIntent.create(
-            amount=200000,  # $2000.00 in cents - adjust based on your pricing
-            currency="usd",
-            payment_method=payment_method_id,
-            confirm=True,
-            description="ClervIQ Subscription",
-            receipt_email=billing.get("email")
-        )
+        print(f"🎉 BETA TESTER SIGNUP: {billing.get('email')}")
         
-        return jsonify({"success": True, "payment_intent_id": payment_intent.id})
+        # Return success without charging (for beta testing)
+        return jsonify({
+            "success": True,
+            "payment_intent_id": "beta_test_free_access",
+            "message": "Beta testing - no charge applied"
+        })
         
-    except stripe.error.CardError as e:
-        return jsonify({"success": False, "error": e.user_message}), 400
     except Exception as e:
+        print(f"Charge error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route("/finish_onboarding")

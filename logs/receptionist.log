@@ -524,3 +524,32 @@
 2025-10-10 12:53:00 | INFO |  * Restarting with stat
 2025-10-10 12:53:04 | WARNING |  * Debugger is active!
 2025-10-10 12:53:04 | INFO |  * Debugger PIN: 381-694-395
+2025-10-10 16:58:18 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-10 16:58:18 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-10 16:58:18 | INFO |  * Restarting with stat
+2025-10-10 16:58:22 | WARNING |  * Debugger is active!
+2025-10-10 16:58:22 | INFO |  * Debugger PIN: 381-694-395
+2025-10-10 16:58:24 | INFO | 127.0.0.1 - - [10/Oct/2025 16:58:24] "[33mGET /dashboard HTTP/1.1[0m" 404 -
+2025-10-10 16:58:40 | INFO | 127.0.0.1 - - [10/Oct/2025 16:58:40] "GET / HTTP/1.1" 200 -
+2025-10-10 16:58:40 | INFO | 127.0.0.1 - - [10/Oct/2025 16:58:40] "[35m[1mGET /static/videos/clerviq-bg.mp4 HTTP/1.1[0m" 206 -
+2025-10-10 16:59:19 | INFO | 127.0.0.1 - - [10/Oct/2025 16:59:19] "[33mGET /analytics HTTP/1.1[0m" 404 -
+2025-10-10 17:33:00 | INFO |  * Detected change in 'C:\\Projects\\Clerv IQ\\app.py', reloading
+2025-10-10 17:33:00 | INFO |  * Restarting with stat
+2025-10-10 17:33:02 | WARNING |  * Debugger is active!
+2025-10-10 17:33:02 | INFO |  * Debugger PIN: 381-694-395
+2025-10-10 17:33:03 | INFO |  * Detected change in 'C:\\Projects\\Clerv IQ\\app.py', reloading
+2025-10-10 17:33:03 | INFO |  * Restarting with stat
+2025-10-10 17:33:04 | WARNING |  * Debugger is active!
+2025-10-10 17:33:04 | INFO |  * Debugger PIN: 381-694-395
+2025-10-10 17:33:05 | INFO |  * Detected change in 'C:\\Projects\\Clerv IQ\\app.py', reloading
+2025-10-10 17:33:06 | INFO |  * Restarting with stat
+2025-10-10 17:33:07 | WARNING |  * Debugger is active!
+2025-10-10 17:33:07 | INFO |  * Debugger PIN: 381-694-395
+2025-10-10 17:33:16 | INFO | 127.0.0.1 - - [10/Oct/2025 17:33:16] "GET /dashboard HTTP/1.1" 200 -
+2025-10-10 17:33:20 | INFO | 127.0.0.1 - - [10/Oct/2025 17:33:20] "GET /calls HTTP/1.1" 200 -
+2025-10-10 17:33:22 | INFO | 127.0.0.1 - - [10/Oct/2025 17:33:22] "GET /dashboard HTTP/1.1" 200 -
+2025-10-10 17:33:25 | INFO | 127.0.0.1 - - [10/Oct/2025 17:33:25] "GET /opportunities HTTP/1.1" 200 -
+2025-10-10 17:33:27 | INFO | 127.0.0.1 - - [10/Oct/2025 17:33:27] "GET /integrations HTTP/1.1" 200 -
+2025-10-10 17:33:28 | INFO | 127.0.0.1 - - [10/Oct/2025 17:33:28] "GET /billing HTTP/1.1" 200 -
+2025-10-10 17:33:30 | INFO | 127.0.0.1 - - [10/Oct/2025 17:33:30] "GET /settings HTTP/1.1" 200 -

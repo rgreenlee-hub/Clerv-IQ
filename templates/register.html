@@ -433,7 +433,7 @@
     }
 
     // === Initialize Stripe ===
-    const stripe = Stripe("pk_live_51RxtOOELaAa23Of2t13jUdNz6fZXyFEUR2IqSvWAyzuztBGY2GcSKDXMTTXPFF7EmIDTrd4wp0gTXnMek2qqreGk000MMbbpJu"); // Replace with your real publishable key
+    const stripe = Stripe("pk_live_51RxtOOELaAa23Of2t13jUdNz6fZXyFEUR2IqSvWAyzuztBGY2GcSKDXMTTXPFF7EmIDTrd4wp0gTXnMek2qqreGk000MMbbpJu");
     const elements = stripe.elements();
 
     // === Custom card element styling ===
@@ -545,12 +545,17 @@
     // Phone Number Hosting Functions
     async function hostPhoneNumber() {
       const phoneInput = document.getElementById('phone-to-host');
-      const phone = phoneInput.value;
+      const phone = phoneInput.value.trim();
       
       if (!phone) {
         alert('Please enter a phone number');
         return;
       }
+      
+      // Disable button while processing
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = 'Sending code...';
       
       try {
         const response = await fetch('/onboarding/host-number', {
@@ -562,25 +567,42 @@
         const result = await response.json();
         
         if (result.success) {
-          document.getElementById('phone-host-form').style.display = 'none';
-          document.getElementById('otp-verification').style.display = 'block';
-          alert('Verification code sent! Check your phone.');
+          if (result.skip_otp) {
+            // No OTP needed, just continue
+            alert(result.message);
+            nextStep();
+          } else {
+            // Show OTP verification
+            document.getElementById('phone-host-form').style.display = 'none';
+            document.getElementById('otp-verification').style.display = 'block';
+            alert('✅ ' + result.message);
+          }
         } else {
-          alert('Error: ' + result.error);
+          alert('Error: ' + result.error + '\n\nYou can skip this step and we\'ll set it up manually.');
+          btn.disabled = false;
+          btn.textContent = 'Send Verification Code';
         }
       } catch (err) {
-        alert('Failed to send verification code: ' + err.message);
+        console.error('Phone verification error:', err);
+        alert('Could not send verification. Click "Skip This Step" to continue.');
+        btn.disabled = false;
+        btn.textContent = 'Send Verification Code';
       }
     }
 
     async function verifyOTP() {
       const otpInput = document.getElementById('otp-code');
-      const otp = otpInput.value;
+      const otp = otpInput.value.trim();
       
       if (!otp || otp.length !== 6) {
         alert('Please enter the 6-digit code');
         return;
       }
+      
+      // Disable button while processing
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
       
       try {
         const response = await fetch('/onboarding/verify-otp', {
@@ -592,23 +614,31 @@
         const result = await response.json();
         
         if (result.success) {
-          alert('✅ Phone number hosted successfully! Your AI receptionist is live.');
+          alert('✅ Phone verified successfully!');
           nextStep();
         } else {
-          alert('Verification failed: ' + result.error);
+          alert('❌ ' + (result.error || 'Invalid code. Please try again.'));
+          btn.disabled = false;
+          btn.textContent = 'Verify & Continue';
+          otpInput.value = '';
+          otpInput.focus();
         }
       } catch (err) {
-        alert('Verification error: ' + err.message);
+        console.error('OTP verification error:', err);
+        alert('Verification error. Please try again or skip this step.');
+        btn.disabled = false;
+        btn.textContent = 'Verify & Continue';
       }
     }
 
     function skipPhoneHosting() {
       const skipCheckbox = document.getElementById('skip-phone');
-      if (skipCheckbox.checked || confirm('Skip phone hosting for now?')) {
+      if (skipCheckbox.checked || confirm('Skip phone hosting for now? You can add this later in your dashboard.')) {
         nextStep();
       }
     }
-  </script>
+
+     </script>
 
 <!-- Chatbot Widget -->
 {% include 'chatbot_widget.html' %}

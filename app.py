@@ -277,73 +277,63 @@ def onboarding():
     return render_template("onboarding.html")
 
 # ---------------------
-# Phone Number Hosting (Twilio) - UPDATED
+# Phone Number Hosting (Twilio) - UPDATED FIXED
 # ---------------------
 @app.route("/onboarding/host-number", methods=["POST"])
 def host_number():
     """Send verification code to phone number"""
     try:
         from twilio.rest import Client
-        
+
         phone_number = request.json.get("phone_number")
-        
+
         if not phone_number:
             return jsonify({"success": False, "error": "Phone number required"}), 400
-        
+
         # Check if Twilio is configured
         account_sid = os.getenv("TWILIO_ACCOUNT_SID")
         auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-        
-        if not account_sid or not auth_token or not TWILIO_AVAILABLE:
-            # No Twilio? Just save the number for manual setup
+        verify_sid = os.getenv("TWILIO_VERIFY_SID")
+
+        # Fallback if Twilio not configured
+        if not account_sid or not auth_token or not TWILIO_AVAILABLE or not verify_sid:
             session['pending_phone'] = phone_number
             return jsonify({
                 "success": True,
                 "status": "saved",
-                "message": "Phone number saved. We'll verify and set it up within 24-48 hours.",
+                "message": "Phone number saved. We'll verify and set it up manually.",
                 "skip_otp": True
             })
-        
-        # Twilio is configured - send verification SMS
+
+        # ✅ Twilio Verify setup
         client = Client(account_sid, auth_token)
-        
-        # Create or get verification service
-        try:
-            services = client.verify.v2.services.list(limit=1)
-            if services:
-                verification_service = services[0]
-            else:
-                verification_service = client.verify.v2.services.create(
-                    friendly_name='ClervIQ Phone Verification'
-                )
-        except:
-            verification_service = client.verify.v2.services.create(
-                friendly_name='ClervIQ Phone Verification'
-            )
-        
-        # Send verification code
-        verification = client.verify.v2.services(verification_service.sid) \
-            .verifications.create(
-                to=phone_number,
-                channel='sms'
-            )
-        
-        # Store in session
-        session['verification_sid'] = verification_service.sid
+
+        # ✅ Format phone number correctly (E.164)
+        if not phone_number.startswith('+'):
+            phone_number = '+1' + phone_number  # assumes US numbers
+
+        # ✅ Send verification code using your Verify Service
+        verification = client.verify.v2.services(verify_sid).verifications.create(
+            to=phone_number,
+            channel='sms'
+        )
+
+        # Store SID and pending phone in session
+        session['verification_sid'] = verify_sid
         session['pending_phone'] = phone_number
-        
+
         return jsonify({
             "success": True,
             "status": "otp_sent",
             "message": f"Verification code sent to {phone_number}"
         })
-        
+
     except Exception as e:
         print(f"Phone verification error: {e}")
         import traceback
         traceback.print_exc()
-        
-        # Fallback: just save the number
+
+        # Fallback: just save number if Twilio fails
         session['pending_phone'] = request.json.get("phone_number")
         return jsonify({
             "success": True,
@@ -358,42 +348,41 @@ def verify_otp():
     """Verify OTP code"""
     try:
         from twilio.rest import Client
-        
+
         otp_code = request.json.get("otp_code")
         verification_sid = session.get('verification_sid')
         phone_number = session.get('pending_phone')
-        
+
         if not verification_sid or not phone_number:
             return jsonify({"success": False, "error": "No pending verification"}), 400
-        
+
         # Check Twilio config
         account_sid = os.getenv("TWILIO_ACCOUNT_SID")
         auth_token = os.getenv("TWILIO_AUTH_TOKEN")
-        
+
         if not account_sid or not auth_token:
             return jsonify({"success": False, "error": "Twilio not configured"}), 400
-        
+
         client = Client(account_sid, auth_token)
-        
-        # Verify the code
-        verification_check = client.verify.v2.services(verification_sid) \
-            .verification_checks.create(
-                to=phone_number,
-                code=otp_code
-            )
-        
+
+        # ✅ Verify the OTP code
+        verification_check = client.verify.v2.services(verification_sid).verification_checks.create(
+            to=phone_number,
+            code=otp_code
+        )
+
         if verification_check.status == 'approved':
             # Success! Store verified phone
             session['verified_phone'] = phone_number
             session.pop('verification_sid', None)
             session.pop('pending_phone', None)
-            
-            # Notify you about the verified phone
+
+            # Notify admin by email
             try:
                 msg = Message(
                     f"New Phone Number Verified - Needs Hosting",
                     sender=app.config['MAIL_USERNAME'],
-                    recipients=[app.config['MAIL_USERNAME']]  # Change to your email
+                    recipients=[app.config['MAIL_USERNAME']]
                 )
                 msg.body = f"""
 New customer verified their phone number:
@@ -412,7 +401,7 @@ Customer is waiting!
                 mail.send(msg)
             except Exception as e:
                 print(f"Notification email failed: {e}")
-            
+
             return jsonify({
                 "success": True,
                 "message": "✅ Phone verified! We'll complete hosting setup within 24-48 hours."
@@ -422,15 +411,16 @@ Customer is waiting!
                 "success": False,
                 "error": "Invalid code. Please try again."
             }), 400
-        
+
     except Exception as e:
         print(f"OTP verification error: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({
             "success": False,
-            "error": f"Verification failed. Please try again or skip this step."
+            "error": "Verification failed. Please try again or skip this step."
         }), 400
+
 
 # ---------------------
 # Stripe Billing - UPDATED FOR BETA

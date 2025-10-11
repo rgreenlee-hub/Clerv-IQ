@@ -54,6 +54,10 @@ app.register_blueprint(auth_bp)  # ✅ ENABLED
 # from receptionist_bridge import bridge_bp
 # app.register_blueprint(bridge_bp, url_prefix="/api/receptionist")
 
+# PASSWORD RESET
+from password_reset import password_reset_bp
+app.register_blueprint(password_reset_bp)
+
 # ---------------------
 # Database
 # ---------------------
@@ -543,5 +547,16 @@ if __name__ == "__main__":
         else:
             print("Admin user already exists")
 
-    print("Starting Flask app...")
-    app.run(debug=True, port=5000)
+        # ✅ ADD YOUR DEMO ACCOUNT
+        if not User.query.filter_by(email="demo@clerviq.com").first():
+            demo_user = User(
+                email="demo@clerviq.com",
+                password=bcrypt.generate_password_hash("Demo2024!").decode("utf-8"),
+                onboarding_complete=True,
+                client_id=1
+            )
+            db.session.add(demo_user)
+            db.session.commit()
+            print("Demo user created: demo@clerviq.com / Demo2024!")
+        else:
+            print("Demo user already exists")

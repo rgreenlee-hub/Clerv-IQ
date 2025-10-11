@@ -13,6 +13,7 @@ WTForms==3.0.1
 # Authentication & security
 Flask-Login==0.6.2
 Flask-Bcrypt==1.0.1
+itsdangerous==2.1.2  # ✅ ADDED FOR PASSWORD RESET
 
 # Database migrations
 Flask-Migrate==4.0.5

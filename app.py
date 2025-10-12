@@ -212,19 +212,8 @@ def contact():
 # ---------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
-        email = request.form.get("email", "")
-        password = request.form.get("password", "")
-        
-        user = User.query.filter_by(email=email).first()
-        if user and bcrypt.check_password_hash(user.password, password):
-            login_user(user)
-            # Send user to dashboard blueprint
-            return redirect(url_for("dashboard.dashboard")) if user.onboarding_complete else redirect(url_for("onboarding"))
-        else:
-            return render_template("login.html", error="Invalid credentials")
-    
-    return render_template("login.html")
+    # Redirect to auth blueprint login which uses the correct database
+    return redirect(url_for("auth.login"))
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

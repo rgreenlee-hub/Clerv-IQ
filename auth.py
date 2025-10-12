@@ -3,7 +3,7 @@ auth.py - User Authentication & Session Management
 Handles signup, login, logout, and client session tracking
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 import sqlite3
@@ -222,7 +222,7 @@ def onboarding():
 # -------------------------------
 @auth_bp.route("/auth/complete-registration", methods=["POST"])
 def complete_registration():
-    """Complete registration after onboarding wizard"""
+    """Complete registration after onboarding wizard - FIXED VERSION"""
     data = request.json
     
     email = data.get("email")
@@ -230,7 +230,6 @@ def complete_registration():
     company_name = data.get("company_name")
     industry = data.get("industry", "")
     phone = data.get("phone", "")
-    onboarding_data = data.get("onboarding_data", {})
     
     # Validate required fields
     if not email or not password or not company_name:
@@ -246,24 +245,18 @@ def complete_registration():
         conn = get_db()
         cursor = conn.cursor()
         
-        # Create user account
+        # Create user account in receptionist.db
         cursor.execute("""
             INSERT INTO users (client_id, email, password_hash, company_name, industry, phone)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (client_id, email, password_hash, company_name, industry, phone))
         
-        # Create initial client config (will be updated later with API keys)
+        # Create initial client config
         cursor.execute("""
             INSERT INTO client_configs 
             (client_id, email_provider, email_address)
             VALUES (?, ?, ?)
         """, (client_id, "gmail", email))
-        
-        # Store full onboarding data as JSON for reference
-        cursor.execute("""
-            INSERT INTO user_configs (user_id, config_type, config_data, created_at)
-            VALUES (?, 'onboarding', ?, ?)
-        """, (client_id, json.dumps(onboarding_data), datetime.now().isoformat()))
         
         conn.commit()
         conn.close()

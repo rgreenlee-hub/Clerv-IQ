@@ -353,6 +353,8 @@ def verify_otp():
         verification_sid = session.get('verification_sid')
         phone_number = session.get('pending_phone')
 
+        print(f"🔍 Verifying OTP: {otp_code} for phone: {phone_number}")
+
         if not verification_sid or not phone_number:
             return jsonify({"success": False, "error": "No pending verification"}), 400
 
@@ -371,13 +373,17 @@ def verify_otp():
             code=otp_code
         )
 
+        print(f"📞 Verification status: {verification_check.status}")
+
         if verification_check.status == 'approved':
             # Success! Store verified phone
             session['verified_phone'] = phone_number
             session.pop('verification_sid', None)
             session.pop('pending_phone', None)
 
-            # Notify admin by email
+            print(f"✅ Phone verified successfully: {phone_number}")
+
+            # Try to notify admin by email (don't fail if this doesn't work)
             try:
                 msg = Message(
                     f"New Phone Number Verified - Needs Hosting",
@@ -399,26 +405,29 @@ ACTION REQUIRED:
 Customer is waiting!
                 """
                 mail.send(msg)
-            except Exception as e:
-                print(f"Notification email failed: {e}")
+                print(f"✅ Notification email sent for {phone_number}")
+            except Exception as email_error:
+                print(f"⚠️ Notification email failed (non-critical): {email_error}")
+                # Don't let email failure break the verification
 
             return jsonify({
                 "success": True,
                 "message": "✅ Phone verified! We'll complete hosting setup within 24-48 hours."
             })
         else:
+            print(f"❌ Verification failed with status: {verification_check.status}")
             return jsonify({
                 "success": False,
                 "error": "Invalid code. Please try again."
             }), 400
 
     except Exception as e:
-        print(f"OTP verification error: {e}")
+        print(f"❌ OTP verification error: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({
             "success": False,
-            "error": "Verification failed. Please try again or skip this step."
+            "error": f"Verification failed: {str(e)}"
         }), 400
 
 

@@ -531,7 +531,7 @@
         // 4. Success - redirect to dashboard
         submitBtn.textContent = "Complete! Redirecting...";
         setTimeout(() => {
-          window.location.href = registrationResult.redirect || "/dashboard";
+          window.location.href = "/dashboard";  // Direct to dashboard;
         }, 1000);
 
       } catch (err) {

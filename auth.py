@@ -136,6 +136,7 @@ def login():
             session["client_id"] = user["client_id"]
             session["email"] = user["email"]
             session["company_name"] = user["company_name"]
+            session.permanent = True  # Make session permanent
             
             flash(f"Welcome back, {user['company_name']}!", "success")
             return redirect(url_for("dashboard.dashboard"))
@@ -231,6 +232,8 @@ def complete_registration():
     industry = data.get("industry", "")
     phone = data.get("phone", "")
     
+    print(f"🎉 Registration attempt: {email}, {company_name}")
+    
     # Validate required fields
     if not email or not password or not company_name:
         return jsonify({"success": False, "error": "Missing required fields"}), 400
@@ -261,10 +264,17 @@ def complete_registration():
         conn.commit()
         conn.close()
         
+        print(f"✅ User created: {client_id}")
+        
         # Auto-login: Create session
+        session.clear()  # Clear any existing session first
         session["client_id"] = client_id
         session["email"] = email
         session["company_name"] = company_name
+        session.permanent = True  # Make session permanent
+        session.modified = True  # Force session save
+        
+        print(f"✅ Session created for: {email}")
         
         return jsonify({
             "success": True,
@@ -273,11 +283,15 @@ def complete_registration():
         })
         
     except sqlite3.IntegrityError as e:
+        print(f"❌ IntegrityError: {e}")
         return jsonify({
             "success": False,
             "error": "Email already exists. Please use a different email."
         }), 400
     except Exception as e:
+        print(f"❌ Error: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             "success": False,
             "error": f"Error creating account: {str(e)}"

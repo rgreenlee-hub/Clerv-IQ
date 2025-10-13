@@ -354,7 +354,7 @@
 
         <div id="card-errors" role="alert" style="color:#ff5555; margin-top:10px;"></div>
 
-        <button id="submit" class="stripe-btn" type="submit">Pay & Go to Dashboard →</button>
+        <button id="submit" class="stripe-btn" type="submit">Create Account & Go to Dashboard →</button>
       </form>
     </div>
     </form>
@@ -452,7 +452,7 @@
     const card = elements.create("card", { style });
     card.mount("#card-element");
 
-    // === Handle form submission ===
+    // === Handle form submission - UPDATED TO SKIP PAYMENT ===
     const paymentForm = document.getElementById("payment-form");
     const submitBtn = document.getElementById("submit");
     const errorBox = document.getElementById("card-errors");
@@ -460,55 +460,13 @@
     paymentForm.addEventListener("submit", async (event) => {
       event.preventDefault();
 
-      // Reset UI
+      // Skip payment entirely - just create account
       errorBox.textContent = "";
       submitBtn.disabled = true;
-      submitBtn.textContent = "Processing...";
-
-      // Collect billing details
-      const billingDetails = {
-        name: document.getElementById("billing-name")?.value || "",
-        email: document.getElementById("billing-email")?.value || "",
-        address: {
-          line1: document.getElementById("billing-address")?.value || "",
-          city: document.getElementById("billing-city")?.value || "",
-          state: document.getElementById("billing-state")?.value || "",
-          postal_code: document.getElementById("billing-zip")?.value || "",
-          country: document.getElementById("billing-country")?.value || ""
-        }
-      };
+      submitBtn.textContent = "Creating your account...";
 
       try {
-        // 1. Create a PaymentMethod
-        const { error, paymentMethod } = await stripe.createPaymentMethod({
-          type: "card",
-          card: card,
-          billing_details: billingDetails,
-        });
-
-        if (error) {
-          throw new Error(error.message);
-        }
-
-        // 2. Send to backend for Stripe payment processing
-        const paymentResponse = await fetch("/charge", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            payment_method: paymentMethod.id,
-            billing: billingDetails
-          }),
-        });
-
-        const paymentResult = await paymentResponse.json();
-
-        if (!paymentResult.success) {
-          throw new Error(paymentResult.error || "Payment failed. Please try again.");
-        }
-
-        // 3. Payment successful - now create user account
-        submitBtn.textContent = "Creating your account...";
-
+        // Create user account directly without payment
         const registrationResponse = await fetch("/auth/complete-registration", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -528,17 +486,16 @@
           throw new Error(registrationResult.error || "Failed to create account");
         }
 
-        // 4. Success - redirect to dashboard
+        // Success - redirect to dashboard
         submitBtn.textContent = "Complete! Redirecting...";
         setTimeout(() => {
-          window.location.href = "/dashboard";  // Direct to dashboard;
-        }, 1000);
+          window.location.href = registrationResult.redirect || "/dashboard";
+        }, 500);
 
       } catch (err) {
-        // Show error message
         errorBox.textContent = err.message;
         submitBtn.disabled = false;
-        submitBtn.textContent = "Pay & Go to Dashboard →";
+        submitBtn.textContent = "Create Account & Go to Dashboard →";
       }
     });
 

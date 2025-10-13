@@ -224,6 +224,8 @@ def onboarding():
 @auth_bp.route("/auth/complete-registration", methods=["POST"])
 def complete_registration():
     """Complete registration after onboarding wizard - FIXED VERSION"""
+    from flask import make_response
+    
     data = request.json
     
     email = data.get("email")
@@ -266,21 +268,23 @@ def complete_registration():
         
         print(f"✅ User created: {client_id}")
         
-        # Auto-login: Create session
-        session.clear()  # Clear any existing session first
+        # CRITICAL FIX: Set session BEFORE creating response
+        session.permanent = True
         session["client_id"] = client_id
         session["email"] = email
         session["company_name"] = company_name
-        session.permanent = True  # Make session permanent
-        session.modified = True  # Force session save
         
         print(f"✅ Session created for: {email}")
+        print(f"✅ Session data: {dict(session)}")
         
-        return jsonify({
+        # Create response with explicit session cookie
+        response = make_response(jsonify({
             "success": True,
             "message": "Account created successfully!",
             "redirect": "/dashboard"
-        })
+        }))
+        
+        return response
         
     except sqlite3.IntegrityError as e:
         print(f"❌ IntegrityError: {e}")

@@ -1,7 +1,5 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session, redirect, url_for, flash
 from datetime import datetime
-from receptionist.elite_ai_receptionist import EliteAIReceptionist
-from Config import CLIENTS
 
 # ---------- Blueprint ----------
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -26,6 +24,9 @@ def log_activity(message):
 def get_dashboard_stats():
     """Try pulling live analytics from receptionist, fallback to local mock data."""
     try:
+        from receptionist.elite_ai_receptionist import EliteAIReceptionist
+        from Config import CLIENTS
+        
         client_conf = CLIENTS[0]
         receptionist = EliteAIReceptionist(client_conf)
         analytics_data = receptionist.get_analytics()
@@ -95,11 +96,20 @@ def get_dashboard_stats():
 # ---------- Dashboard + Sidebar Routes ----------
 @dashboard_bp.route("/dashboard")
 def dashboard():
+    # Check if user is logged in
+    if "client_id" not in session:
+        flash("Please log in to access the dashboard", "error")
+        return redirect(url_for("auth.login"))
+    
+    print(f"✅ Dashboard accessed by: {session.get('email')}")
     stats = get_dashboard_stats()
     return render_template("dashboard.html", stats=stats)
 
 @dashboard_bp.route("/calls")
 def calls_page():
+    if "client_id" not in session:
+        return redirect(url_for("auth.login"))
+    
     stats = get_dashboard_stats()
     calls = stats.get("calls_data", {})
     if not calls:
@@ -108,6 +118,9 @@ def calls_page():
 
 @dashboard_bp.route("/sms")
 def sms_page():
+    if "client_id" not in session:
+        return redirect(url_for("auth.login"))
+    
     stats = get_dashboard_stats()
     sms = stats.get("sms_data", {})
     if not sms:
@@ -116,6 +129,9 @@ def sms_page():
 
 @dashboard_bp.route("/emails")
 def emails_page():
+    if "client_id" not in session:
+        return redirect(url_for("auth.login"))
+    
     stats = get_dashboard_stats()
     emails = stats.get("email_data", {})
     if not emails:
@@ -124,6 +140,9 @@ def emails_page():
 
 @dashboard_bp.route("/leads")
 def leads_page():
+    if "client_id" not in session:
+        return redirect(url_for("auth.login"))
+    
     stats = get_dashboard_stats()
     leads = stats.get("leads_data", {})
     if not leads:
@@ -147,17 +166,26 @@ def leads_page():
 
 @dashboard_bp.route("/opportunities")
 def opportunities_page():
+    if "client_id" not in session:
+        return redirect(url_for("auth.login"))
+    
     stats = get_dashboard_stats()
     opps = stats.get("opportunities", [])
     return render_template("opportunities.html", opps=opps)
 
 @dashboard_bp.route("/analytics")
 def analytics_page():
+    if "client_id" not in session:
+        return redirect(url_for("auth.login"))
+    
     stats = get_dashboard_stats()
     return render_template("analytics.html", stats=stats)
 
 @dashboard_bp.route("/integrations")
 def integrations_page():
+    if "client_id" not in session:
+        return redirect(url_for("auth.login"))
+    
     integrations = {
         "twilio": {"status": "Connected", "last_sync": "2025-10-01"},
         "stripe": {"status": "Connected", "last_sync": "2025-10-02"},
@@ -167,6 +195,9 @@ def integrations_page():
 
 @dashboard_bp.route("/billing")
 def billing_page():
+    if "client_id" not in session:
+        return redirect(url_for("auth.login"))
+    
     billing = {
         "plan": "Concierge Plan",
         "price": "$2,000 / month",
@@ -177,6 +208,9 @@ def billing_page():
 
 @dashboard_bp.route("/settings")
 def settings_page():
-    user = {"name": "Demo User", "email": "demo@clerviq.com"}
-    company = {"name": "ClervIQ Inc.", "industry": "Real Estate AI"}
+    if "client_id" not in session:
+        return redirect(url_for("auth.login"))
+    
+    user = {"name": session.get("company_name", "User"), "email": session.get("email", "")}
+    company = {"name": session.get("company_name", "Your Company"), "industry": "AI Services"}
     return render_template("settings.html", user=user, company=company)

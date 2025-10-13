@@ -372,32 +372,32 @@ def verify_otp():
 
             print(f"✅ Phone verified successfully: {phone_number}")
 
-            # Try to notify admin by email (don't fail if this doesn't work)
-            try:
-                msg = Message(
-                    f"New Phone Number Verified - Needs Hosting",
-                    sender=app.config['MAIL_USERNAME'],
-                    recipients=[app.config['MAIL_USERNAME']]
-                )
-                msg.body = f"""
-New customer verified their phone number:
-
-Phone: {phone_number}
-
-ACTION REQUIRED:
-1. Go to Twilio Console: https://console.twilio.com/us1/develop/phone-numbers/port-host/hosted-numbers
-2. Click "Host a Number"
-3. Enter: {phone_number}
-4. Submit hosting request
-5. Takes 1-2 days to complete
-
-Customer is waiting!
-                """
-                mail.send(msg)
-                print(f"✅ Notification email sent for {phone_number}")
-            except Exception as email_error:
-                print(f"⚠️ Notification email failed (non-critical): {email_error}")
-                # Don't let email failure break the verification
+            # COMMENTED OUT EMAIL NOTIFICATION TO PREVENT MEMORY CRASH ON FREE TIER
+            # try:
+            #     msg = Message(
+            #         f"New Phone Number Verified - Needs Hosting",
+            #         sender=app.config['MAIL_USERNAME'],
+            #         recipients=[app.config['MAIL_USERNAME']]
+            #     )
+            #     msg.body = f"""
+            # New customer verified their phone number:
+            # 
+            # Phone: {phone_number}
+            # 
+            # ACTION REQUIRED:
+            # 1. Go to Twilio Console: https://console.twilio.com/us1/develop/phone-numbers/port-host/hosted-numbers
+            # 2. Click "Host a Number"
+            # 3. Enter: {phone_number}
+            # 4. Submit hosting request
+            # 5. Takes 1-2 days to complete
+            # 
+            # Customer is waiting!
+            #     """
+            #     mail.send(msg)
+            #     print(f"✅ Notification email sent for {phone_number}")
+            # except Exception as email_error:
+            #     print(f"⚠️ Notification email failed (non-critical): {email_error}")
+            #     # Don't let email failure break the verification
 
             return jsonify({
                 "success": True,

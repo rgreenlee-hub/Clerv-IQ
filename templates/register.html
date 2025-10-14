@@ -92,6 +92,38 @@
       opacity: 0.9;
     }
 
+    .button-group {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .back-btn {
+      background: #555;
+    }
+
+    .back-btn:hover {
+      background: #666;
+    }
+
+    .password-container {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #00d4ff;
+      font-size: 18px;
+      user-select: none;
+    }
+
     .review {
       text-align: left;
       background: #1a1a1a;
@@ -131,14 +163,23 @@
         <p>Preferred Contact Email</p>
         <input type="email" name="contact_email" placeholder="you@company.com">
         <p>Create Password</p>
-        <input type="password" name="password" placeholder="Minimum 8 characters" minlength="8">
+        <div class="password-container">
+          <input type="password" id="password" name="password" placeholder="Minimum 8 characters" minlength="8">
+          <span class="toggle-password" onclick="togglePassword('password', this)">👁️</span>
+        </div>
         <p>Confirm Password</p>
-        <input type="password" name="confirm_password" placeholder="Re-enter password">
+        <div class="password-container">
+          <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password">
+          <span class="toggle-password" onclick="togglePassword('confirm_password', this)">👁️</span>
+        </div>
         <p>Preferred Contact Phone</p>
         <input type="tel" name="phone" placeholder="(123) 456-7890">
         <p>Preferred SMS Number</p>
         <input type="tel" name="sms" placeholder="(123) 456-7890">
-        <button type="button" onclick="nextStep()">Next</button>
+        <div class="button-group">
+          <button type="button" class="back-btn" onclick="prevStep()">Back</button>
+          <button type="button" onclick="nextStep()">Next</button>
+        </div>
       </div>
 
       <!-- Step 3: Business Profile -->
@@ -149,7 +190,10 @@
         <input type="number" name="client_value" placeholder="$5000">
         <p>Average Monthly Leads</p>
         <input type="number" name="monthly_leads" placeholder="e.g. 100">
-        <button type="button" onclick="nextStep()">Next</button>
+        <div class="button-group">
+          <button type="button" class="back-btn" onclick="prevStep()">Back</button>
+          <button type="button" onclick="nextStep()">Next</button>
+        </div>
       </div>
 
    <!-- Step 4: Operations -->
@@ -176,7 +220,10 @@
     <option>Other</option>
   </select>
 
-  <button type="button" onclick="nextStep()">Next</button>
+  <div class="button-group">
+    <button type="button" class="back-btn" onclick="prevStep()">Back</button>
+    <button type="button" onclick="nextStep()">Next</button>
+  </div>
 </div>
 
       <!-- Step 5: Goals -->
@@ -201,7 +248,10 @@
           <option>6 months</option>
           <option>12+ months</option>
         </select>
-        <button type="button" onclick="nextStep()">Next</button>
+        <div class="button-group">
+          <button type="button" class="back-btn" onclick="prevStep()">Back</button>
+          <button type="button" onclick="nextStep()">Next</button>
+        </div>
       </div>
 
       <!-- Step 6: Preferences -->
@@ -225,7 +275,10 @@
           <option>Concierge</option>
           <option>White-Glove</option>
         </select>
-        <button type="button" onclick="nextStep()">Next</button>
+        <div class="button-group">
+          <button type="button" class="back-btn" onclick="prevStep()">Back</button>
+          <button type="button" onclick="nextStep()">Next</button>
+        </div>
       </div>
 
       <!-- Step 7: Team -->
@@ -244,7 +297,10 @@
           <option>Sales</option>
           <option>Billing</option>
         </select>
-        <button type="button" onclick="nextStep()">Next</button>
+        <div class="button-group">
+          <button type="button" class="back-btn" onclick="prevStep()">Back</button>
+          <button type="button" onclick="nextStep()">Next</button>
+        </div>
       </div>
 
       <!-- Step 8: Integrations -->
@@ -258,7 +314,10 @@
           <option>Yes - Stripe</option>
           <option>Yes - HubSpot</option>
         </select>
-        <button type="button" onclick="nextStep()">Next</button>
+        <div class="button-group">
+          <button type="button" class="back-btn" onclick="prevStep()">Back</button>
+          <button type="button" onclick="nextStep()">Next</button>
+        </div>
       </div>
 
       <!-- Step 9: Compliance -->
@@ -269,7 +328,10 @@
         <input type="checkbox" name="ccpa"> CCPA<br>
         <input type="checkbox" name="none"> None<br>
         <p><input type="checkbox" name="consent"> I consent to SMS/Email communication</p>
-        <button type="button" onclick="nextStep()">Next</button>
+        <div class="button-group">
+          <button type="button" class="back-btn" onclick="prevStep()">Back</button>
+          <button type="button" onclick="nextStep()">Next</button>
+        </div>
       </div>
 
 <!-- Step 10: Host Phone Number -->
@@ -291,7 +353,10 @@
   <p style="margin-top:20px; font-size:12px; color:#888;">
     <input type="checkbox" id="skip-phone"> Skip for now (you can add this later in dashboard)
   </p>
-  <button type="button" onclick="skipPhoneHosting()" style="background:#555;">Skip This Step</button>
+  <div class="button-group">
+    <button type="button" class="back-btn" onclick="prevStep()">Back</button>
+    <button type="button" onclick="skipPhoneHosting()" style="background:#555;">Skip This Step</button>
+  </div>
 </div>
 
       <!-- Step 11: Review & Billing -->
@@ -354,7 +419,10 @@
 
         <div id="card-errors" role="alert" style="color:#ff5555; margin-top:10px;"></div>
 
-        <button id="submit" class="stripe-btn" type="submit">Create Account & Go to Dashboard →</button>
+        <div class="button-group">
+          <button type="button" class="back-btn" onclick="prevStep()">Back</button>
+          <button id="submit" class="stripe-btn" type="submit">Create Account & Go to Dashboard →</button>
+        </div>
       </form>
     </div>
     </form>
@@ -375,6 +443,18 @@
       progressContainer.appendChild(bar);
     });
     const progress = document.querySelectorAll(".step");
+
+    // Toggle password visibility
+    function togglePassword(fieldId, icon) {
+      const field = document.getElementById(fieldId);
+      if (field.type === 'password') {
+        field.type = 'text';
+        icon.textContent = '🙈';
+      } else {
+        field.type = 'password';
+        icon.textContent = '👁️';
+      }
+    }
 
     function nextStep() {
       // Only validate inputs in the current step
@@ -419,6 +499,16 @@
         if (currentStep === steps.length - 1) {
           buildReview();
         }
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        steps[currentStep].classList.remove("active");
+        progress[currentStep].classList.remove("active");
+        currentStep--;
+        steps[currentStep].classList.add("active");
+        progress[currentStep].classList.add("active");
       }
     }
 

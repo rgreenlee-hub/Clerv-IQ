@@ -97,34 +97,60 @@
     /* Voice Settings */
     .voice-settings {
       margin-top: 50px;
-      background: rgba(20, 30, 60, 0.4);
-      padding: 30px;
+      background: rgba(20, 30, 60, 0.6);
+      padding: 40px;
       border-radius: 20px;
-      border: 1px solid rgba(0, 212, 255, 0.15);
+      border: 1px solid rgba(0, 212, 255, 0.3);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .voice-settings h3 {
+      color: #00d4ff;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .voice-settings > p {
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 30px;
     }
 
     .voice-settings label {
       display: block;
-      margin-top: 10px;
-      font-size: 14px;
-      color: rgba(255,255,255,0.8);
+      margin-top: 20px;
+      margin-bottom: 8px;
+      font-size: 16px;
+      color: #00d4ff;
+      font-weight: bold;
     }
 
-    .voice-settings select, .voice-settings input {
+    .voice-settings select, .voice-settings input[type="text"], .voice-settings textarea {
       width: 100%;
-      padding: 10px;
+      padding: 14px;
       margin-top: 8px;
       border-radius: 10px;
-      border: none;
-      background: rgba(255,255,255,0.1);
-      color: #fff;
+      border: 1px solid rgba(0, 212, 255, 0.3);
+      background: rgba(10, 14, 39, 0.8);
+      color: #e8f0ff;
       font-family: 'Courier Prime', monospace;
+      font-size: 16px;
+    }
+
+    .voice-settings select option {
+      background: #0a0e27;
+      color: #e8f0ff;
+      padding: 10px;
+    }
+
+    .voice-settings textarea {
+      min-height: 100px;
+      resize: vertical;
     }
 
     .voice-settings button {
       margin-top: 20px;
-      padding: 12px 24px;
+      margin-right: 10px;
+      padding: 14px 28px;
       border: none;
       border-radius: 10px;
       background: linear-gradient(135deg, #00d4ff, #0080ff);
@@ -132,9 +158,80 @@
       font-weight: 700;
       letter-spacing: 1px;
       cursor: pointer;
+      font-size: 16px;
+      transition: 0.3s;
     }
 
-    #voiceStatus { margin-top: 10px; font-size: 13px; color: #00d4ff; }
+    .voice-settings button:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .record-btn {
+      background: linear-gradient(135deg, #ff4d4d, #ff0080) !important;
+    }
+
+    .stop-btn {
+      background: #555 !important;
+    }
+
+    #voiceStatus { 
+      margin-top: 15px; 
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+    }
+
+    #voiceStatus.success {
+      background: rgba(0, 255, 170, 0.2);
+      color: #00ffaa;
+      border: 1px solid #00ffaa;
+      display: block;
+    }
+
+    #voiceStatus.error {
+      background: rgba(255, 77, 77, 0.2);
+      color: #ff4d4d;
+      border: 1px solid #ff4d4d;
+      display: block;
+    }
+
+    .recording-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      background: #ff4d4d;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    #clone_section {
+      padding: 20px;
+      background: rgba(0, 212, 255, 0.05);
+      border-radius: 10px;
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      margin-top: 20px;
+    }
+
+    .audio-preview {
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      display: none;
+    }
+
+    .audio-preview audio {
+      width: 100%;
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -180,15 +277,21 @@
 
       <!-- 🎙️ Voice Settings Section -->
       <div class="voice-settings">
-        <h3>🎙️ Voice Settings</h3>
-        <p>Customize your AI receptionist’s voice and accent.</p>
+        <h3>🎙️ AI Receptionist Voice Settings</h3>
+        <p>Customize your AI receptionist's voice, greeting, and business information.</p>
+
+        <label>Business Phone Number</label>
+        <input type="text" id="business_phone" placeholder="+1 (555) 123-4567" value="">
+
+        <label>AI Greeting Message</label>
+        <textarea id="greeting_message" placeholder="Thank you for calling [Company Name]. How can I help you today?">Thank you for calling. How can I help you today?</textarea>
 
         <label>Voice Type</label>
         <select id="voice_type">
-          <option value="female">Female</option>
-          <option value="male">Male</option>
+          <option value="female">Female (Professional)</option>
+          <option value="male">Male (Professional)</option>
           <option value="neutral">Neutral</option>
-          <option value="clone">Custom Cloned Voice</option>
+          <option value="clone">🎤 Custom Cloned Voice (Your Voice)</option>
         </select>
 
         <label>Accent</label>
@@ -201,36 +304,167 @@
         </select>
 
         <div id="clone_section" style="display:none;">
-          <label>Upload Voice Sample</label>
-          <input type="file" id="clone_file" accept="audio/*">
+          <h4 style="color: #00d4ff; margin-top: 0;">🎤 Record Your Voice</h4>
+          <p style="color: rgba(255,255,255,0.7); font-size: 14px;">
+            Record 30-60 seconds of yourself speaking naturally. The AI will clone your voice for the receptionist.
+          </p>
+          
+          <button id="recordBtn" class="record-btn" onclick="toggleRecording()">
+            <i class="fas fa-microphone"></i> Start Recording
+          </button>
+          
+          <p id="recordingStatus" style="color: #ff4d4d; margin-top: 10px; display: none;">
+            <span class="recording-indicator"></span>
+            Recording... <span id="recordingTime">0:00</span>
+          </p>
+
+          <div id="audioPreview" class="audio-preview">
+            <p style="color: #00d4ff; margin: 0;">✅ Recording Complete</p>
+            <audio id="audioPlayback" controls></audio>
+            <button onclick="clearRecording()" style="background: #ff4d4d; margin-top: 10px;">
+              <i class="fas fa-trash"></i> Delete & Re-record
+            </button>
+          </div>
+
+          <p style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 15px;">
+            💡 Tip: Speak clearly and at a normal pace. Say a few sentences about your business.
+          </p>
         </div>
 
-        <button onclick="saveVoiceSettings()">Save Voice Settings</button>
-        <p id="voiceStatus"></p>
+        <button onclick="saveVoiceSettings()">
+          <i class="fas fa-save"></i> Save Voice Settings
+        </button>
+        
+        <button onclick="testCall()" style="background: linear-gradient(135deg, #00ffaa, #00d4ff);">
+          <i class="fas fa-phone"></i> Test Call AI
+        </button>
+        
+        <div id="voiceStatus"></div>
       </div>
 
       <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordingInterval;
+        let recordingSeconds = 0;
+        let audioBlob = null;
+
         const voiceSelect = document.getElementById("voice_type");
         const cloneSection = document.getElementById("clone_section");
+        
         voiceSelect.addEventListener("change", () => {
           cloneSection.style.display = voiceSelect.value === "clone" ? "block" : "none";
         });
 
+        async function toggleRecording() {
+          const recordBtn = document.getElementById("recordBtn");
+          const recordingStatus = document.getElementById("recordingStatus");
+          const audioPreview = document.getElementById("audioPreview");
+
+          if (!mediaRecorder || mediaRecorder.state === "inactive") {
+            // Start recording
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              mediaRecorder = new MediaRecorder(stream);
+              audioChunks = [];
+              recordingSeconds = 0;
+
+              mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+              };
+
+              mediaRecorder.onstop = () => {
+                audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                document.getElementById("audioPlayback").src = audioUrl;
+                audioPreview.style.display = "block";
+                
+                // Stop all tracks
+                stream.getTracks().forEach(track => track.stop());
+              };
+
+              mediaRecorder.start();
+              recordBtn.innerHTML = '<i class="fas fa-stop"></i> Stop Recording';
+              recordBtn.classList.add('stop-btn');
+              recordingStatus.style.display = "block";
+
+              // Update timer
+              recordingInterval = setInterval(() => {
+                recordingSeconds++;
+                const mins = Math.floor(recordingSeconds / 60);
+                const secs = recordingSeconds % 60;
+                document.getElementById("recordingTime").textContent = 
+                  `${mins}:${secs.toString().padStart(2, '0')}`;
+              }, 1000);
+
+            } catch (err) {
+              showStatus("error", "❌ Microphone access denied. Please allow microphone access.");
+              console.error(err);
+            }
+
+          } else {
+            // Stop recording
+            mediaRecorder.stop();
+            clearInterval(recordingInterval);
+            recordBtn.innerHTML = '<i class="fas fa-microphone"></i> Start Recording';
+            recordBtn.classList.remove('stop-btn');
+            recordingStatus.style.display = "none";
+          }
+        }
+
+        function clearRecording() {
+          audioBlob = null;
+          document.getElementById("audioPreview").style.display = "none";
+          document.getElementById("audioPlayback").src = "";
+          audioChunks = [];
+          recordingSeconds = 0;
+          document.getElementById("recordingTime").textContent = "0:00";
+        }
+
         async function saveVoiceSettings() {
           const voiceType = document.getElementById("voice_type").value;
           const accent = document.getElementById("accent").value;
-          const cloneFile = document.getElementById("clone_file").files[0];
+          const businessPhone = document.getElementById("business_phone").value;
+          const greetingMessage = document.getElementById("greeting_message").value;
+
           const formData = new FormData();
           formData.append("voice_type", voiceType);
           formData.append("accent", accent);
-          if (cloneFile) formData.append("clone_file", cloneFile);
+          formData.append("business_phone", businessPhone);
+          formData.append("greeting_message", greetingMessage);
+          
+          if (voiceType === "clone" && audioBlob) {
+            formData.append("clone_file", audioBlob, "voice_recording.wav");
+          }
 
-          const res = await fetch("/api/receptionist/voice/settings", { method: "POST", body: formData });
-          const data = await res.json();
-          document.getElementById("voiceStatus").innerText =
-            data.status === "success"
-              ? "✅ Voice settings saved successfully!"
-              : "❌ " + (data.error || "Failed to save settings");
+          showStatus("success", "⏳ Saving voice settings...");
+
+          try {
+            const res = await fetch("/api/receptionist/voice/settings", { 
+              method: "POST", 
+              body: formData 
+            });
+            const data = await res.json();
+            
+            if (data.status === "success") {
+              showStatus("success", "✅ Voice settings saved successfully!");
+            } else {
+              showStatus("error", "❌ " + (data.error || "Failed to save settings"));
+            }
+          } catch (err) {
+            showStatus("error", "❌ Network error. Please try again.");
+            console.error(err);
+          }
+        }
+
+        function showStatus(type, message) {
+          const statusEl = document.getElementById("voiceStatus");
+          statusEl.className = type;
+          statusEl.textContent = message;
+        }
+
+        async function testCall() {
+          showStatus("success", "📞 Test call feature coming soon! Your AI will answer incoming calls automatically.");
         }
       </script>
     </div>

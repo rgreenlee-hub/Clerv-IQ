@@ -317,8 +317,13 @@
 
 <!-- Hero Section -->
 <section id="home" class="hero">
+  <video autoplay muted loop playsinline id="heroVideo">
+    <source src="{{ url_for('static', filename='videos/clerviq-bg.mp4') }}" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
   <div class="hero-content">
-    <h1>AI Receptionist. Automation. Web Design.</h1>
+    <h1>AI Receptionists. Custom Automations. </h1>
     <p>Never miss a lead again. We build intelligent systems that capture opportunities 24/7 while you focus on growing your business.</p>
     <div class="hero-buttons">
       <a href="#services">Our Services</a>
